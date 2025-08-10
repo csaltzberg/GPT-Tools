@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>CANVAS Course Banner Design Panel</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      background: #f9f9f9;
+      margin: 20px;
+    }
+    h1, h2 {
+      border-bottom: 2px solid #ccc;
+      padding-bottom: 5px;
+    }
+    .section {
+      background: #fff;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      padding: 15px;
+      margin-bottom: 30px;
+    }
+    label {
+      display: block;
+      font-weight: bold;
+      margin-top: 10px;
+    }
+    input[type="text"], textarea, select {
+      width: 100%;
+      padding: 6px;
+      margin-top: 4px;
+      font-size: 1em;
+      font-style: italic;
+      color: #333;
+    }
+    input::placeholder, textarea::placeholder {
+      color: #aaa;
+      font-style: italic;
+    }
+    input[type="range"] {
+      width: 100%;
+    }
+    input[type="color"] {
+      width: 100%;
+      height: 36px;
+      border: none;
+    }
+    .preview {
+      border: 1px dashed #aaa;
+      padding: 20px;
+      background-color: #fff;
+      text-align: center;
+      margin-top: 30px;
+    }
+    .preview h1, .preview h2 {
+      margin: 0.5em 0;
+    }
+    #output {
+      background: #eef;
+      padding: 10px;
+      font-family: monospace;
+      white-space: pre-wrap;
+      border-radius: 6px;
+    }
+    button {
+      margin: 10px 10px 0 0;
+      padding: 10px;
+    }
+  </style>
+</head>
+<body>
+  <h1>CANVAS Course Banner Design Panel</h1>
+
+  <div class="section">
+    <h2>Import Existing Settings</h2>
+    <label>Paste Configuration Text:</label>
+    <textarea id="importText" rows="6" placeholder="Paste previously generated configuration text here..."></textarea>
+    <button onclick="importSettings()">Apply Settings</button>
+  </div>
+
+  <div class="section">
+    <h2>1. Prompt Definition</h2>
+    <label>HEADER_TEXT:</label>
+    <input type="text" id="header_text" placeholder="e.g., MCB2004L" />
+    <label>SUBHEADER_TEXT_L1:</label>
+    <input type="text" id="subheader_text_l1" placeholder="e.g., MICROBIOLOGY" />
+    <label>SUBHEADER_TEXT_L2:</label>
+    <input type="text" id="subheader_text_l2" placeholder="e.g., LECTURE" />
+    <label>MAJOR_THEME:</label>
+    <input type="text" id="major_theme" placeholder="e.g., microbiology" />
+    <label>MINOR_THEME:</label>
+    <input type="text" id="minor_theme" placeholder="e.g., laboratory" />
+    <label>REQUIRED_KEY_ITEMS:</label>
+    <input type="text" id="required_key_items" placeholder="e.g., pipette, microscope, beaker" />
+    <label>REQUIRED_KEY_OBJECTS:</label>
+    <input type="text" id="required_key_objects" placeholder="e.g., phylogenetic tree" />
+    <label>EXCLUDED_ITEMS:</label>
+    <input type="text" id="excluded_items" placeholder="e.g., biohazard logo" />
+  </div>
+
+  <div class="section">
+    <h2>2. Text Configuration</h2>
+    <label><input type="checkbox" id="text_present" /> TEXT_PRESENT</label>
+    <label>TEXT_SIZE:</label><input type="range" id="text_size" min="0" max="10" />
+    <label>TEXT_WEIGHT:</label><input type="range" id="text_weight" min="0" max="10" />
+    <label>TEXT_JUSTIFY:</label><input type="range" id="text_justify" min="0" max="10" />
+    <label><input type="checkbox" id="text_justify_toggle" /> TEXT_JUSTIFY_TOGGLE</label>
+    <label>TEXT_HIERARCHY:</label><input type="range" id="text_hierarchy" min="0" max="10" />
+    <label>TEXT_SHADOW:</label><input type="range" id="text_shadow" min="0" max="10" />
+    <label><input type="checkbox" id="text_outline" /> TEXT_OUTLINE</label>
+  </div>
+
+  <div class="section">
+    <h2>3. Icon Style & Detail</h2>
+    <label>ICON_DETAIL:</label><input type="range" id="icon_detail" min="0" max="10" />
+    <label>ICON_STYLE:</label><input type="range" id="icon_style" min="0" max="10" />
+    <label>ICON_DENSITY:</label><input type="range" id="icon_density" min="0" max="10" />
+    <label>LAB_FOCUS:</label><input type="range" id="lab_focus" min="0" max="10" />
+    <label>ICON_VARIETY:</label><input type="range" id="icon_variety" min="0" max="10" />
+    <label>ICON_SCALE_RANGE:</label><input type="range" id="icon_scale_range" min="0" max="10" />
+    <label>CONCEPTUAL_INTEGRATION:</label><input type="range" id="conceptual_integration" min="0" max="10" />
+  </div>
+
+  <div class="section">
+    <h2>4. Composition & Flow</h2>
+    <label>SYMMETRY:</label><input type="range" id="symmetry" min="0" max="10" />
+    <label>MOTION_LINES:</label><input type="range" id="motion_lines" min="0" max="10" />
+    <label>FOCAL_CLEARANCE:</label><input type="range" id="focal_clearance" min="0" max="10" />
+    <label>FRAMING_STYLE:</label><input type="range" id="framing_style" min="0" max="10" />
+    <label>CENTER_WEIGHT:</label><input type="range" id="center_weight" min="0" max="10" />
+    <label>OVERLAY_DEPTH:</label><input type="range" id="overlay_depth" min="0" max="10" />
+  </div>
+
+  <div class="section">
+    <h2>5. Color Settings</h2>
+    <label>BACKGROUND_COLOR:</label><input type="color" id="background_color" value="#ffffff" />
+    <label>TEXT_COLOR:</label><input type="color" id="text_color" value="#222222" />
+    <label>ICON_COLOR:</label><input type="color" id="icon_color" value="#888888" />
+    <label>EMBELLISH_COLOR:</label><input type="color" id="embellish_color" value="#cccccc" />
+  </div>
+
+  <div class="section">
+    <h2>6. Output Size & Extras</h2>
+    <label>IMAGE_SIZE / ASPECT_RATIO:</label>
+    <select id="image_size">
+      <option value="16:9">16:9 (default Canvas banner)</option>
+      <option value="4:3">4:3</option>
+      <option value="3:2">3:2</option>
+      <option value="1:1">1:1 (square)</option>
+      <option value="custom">Custom (add to special instructions)</option>
+    </select>
+    <label>SPECIAL_INSTRUCTIONS:</label>
+    <textarea id="special_instructions" rows="4" placeholder="e.g., Use a faded edge on the banner or include extra white space at top"></textarea>
+  </div>
+
+  <div class="preview" id="preview">
+    <h1 id="previewHeader">Sample Header</h1>
+    <h2 id="previewSub1">Subheader Line 1</h2>
+    <h2 id="previewSub2">Subheader Line 2</h2>
+  </div>
+
+  <div class="section">
+    <button onclick="updatePreview()">Update Preview</button>
+    <button onclick="generateOutput()">Generate Prompt Output</button>
+    <pre id="output"></pre>
+    <button onclick="copyText()">Copy to Clipboard</button>
+  </div>
+
+  <script>
+    function get(id) {
+      return document.getElementById(id);
+    }
+
+    function updatePreview() {
+      get('previewHeader').textContent = get('header_text').value;
+      get('previewSub1').textContent = get('subheader_text_l1').value;
+      get('previewSub2').textContent = get('subheader_text_l2').value;
+      get('preview').style.backgroundColor = get('background_color').value;
+      get('previewHeader').style.color = get('text_color').value;
+      get('previewSub1').style.color = get('text_color').value;
+      get('previewSub2').style.color = get('text_color').value;
+    }
+
+    function generateOutput() {
+      const ids = Array.from(document.querySelectorAll('input, textarea, select'));
+      let output = '';
+      ids.forEach(el => {
+        const id = el.id.toUpperCase();
+        const val = el.type === 'checkbox' ? (el.checked ? '1' : '0') : el.value;
+        output += `${id}: ${val}\n`;
+      });
+      get('output').textContent = output;
+    }
+
+    function copyText() {
+      navigator.clipboard.writeText(get('output').textContent);
+      alert('Copied!');
+    }
+
+    function importSettings() {
+      const lines = get('importText').value.trim().split('\n');
+      lines.forEach(line => {
+        const [keyRaw, ...valParts] = line.split(':');
+        const key = keyRaw.trim().toLowerCase();
+        const val = valParts.join(':').trim();
+        const el = get(key);
+        if (el) {
+          if (el.type === 'checkbox') {
+            el.checked = val === '1';
+          } else {
+            el.value = val;
+          }
+        }
+      });
+      updatePreview();
+    }
+  </script>
+</body>
+</html>
