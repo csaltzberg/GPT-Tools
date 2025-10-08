@@ -57,21 +57,38 @@
     from{transform:translate(-50%,-50%) scale(0.2);opacity:0.8;}
     to{transform:translate(-50%,-50%) scale(8);opacity:0;}
   }
+
+  /* Minimal counter box */
+  #counter{
+    position:fixed;top:10px;left:10px;
+    background:rgba(255,255,255,0.7);
+    border-radius:8px;padding:6px 10px;
+    font:600 18px system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+    z-index:50;pointer-events:none;
+    white-space:nowrap;
+  }
+  #counter span{margin-right:10px;}
 </style>
 </head>
 <body>
 
 <div id="bigDuck" class="big-duck">🦆</div>
+
 <div id="controls">
   <button id="callBtn" class="btn">📣</button>
   <button id="layBtn" class="btn">🥚</button>
   <button id="modeBtn" class="btn">🎛️</button>
 </div>
 
-<!-- Updated to use your local .wav file -->
+<div id="counter">
+  <span>🥚 0</span><span>🐣 0</span><span>🐤 0</span>
+</div>
+
+<!-- Local WAV quack -->
 <audio id="honkSound" src="duck-quack.wav" preload="auto"></audio>
 
 <script>
+/* ---------------- PARAMETERS ---------------- */
 const CALL_ANGLE_DEVIATION_DEG=45,MAX_TRAVEL_FRACTION=0.10,
 SEG_MIN_MS=500,SEG_MAX_MS=4000,PAUSE_CHANCE=0.25,
 PAUSE_MIN_MS=100,PAUSE_MAX_MS=3000,EGG_TO_HATCH_MS_MIN=3000,
@@ -83,25 +100,30 @@ CALL_FOCUS_MIN_MS=1000,CALL_FOCUS_MAX_MS=10000,
 GYRO_MAX_PX_PER_SEC=innerWidth*0.30,
 GYRO_MAX_PX_PER_MS=GYRO_MAX_PX_PER_SEC/1000;
 
-const bigDuckEl=document.getElementById('bigDuck'),
-callBtn=document.getElementById('callBtn'),
-layBtn=document.getElementById('layBtn'),
-modeBtn=document.getElementById('modeBtn'),
-honkEl=document.getElementById('honkSound');
+/* ---------------- STATE ---------------- */
+const bigDuckEl=document.getElementById('bigDuck');
+const callBtn=document.getElementById('callBtn');
+const layBtn=document.getElementById('layBtn');
+const modeBtn=document.getElementById('modeBtn');
+const honkEl=document.getElementById('honkSound');
+const counterEl=document.getElementById('counter');
 
 let rallyUntil=0,lastCallAt=0,lastLayAt=0,facingRight=false,useGyro=false;
 let duck={bx:innerWidth/2,by:innerHeight/2},duckSize={w:0,h:0};
 const keys={},gyro={beta:0,gamma:0,baseBeta:0,baseGamma:0},gyroDeadzone=2,ducklings=[];
 
+/* ---------------- UTILS ---------------- */
 const clamp=(v,min,max)=>Math.max(min,Math.min(max,v));
 const rand=(a,b)=>a+Math.random()*(b-a);
 const degToRad=d=>d*Math.PI/180;
 function measureDuck(){const r=bigDuckEl.getBoundingClientRect();duckSize.w=r.width;duckSize.h=r.height;}
 function maxSpeedPxPerMs(){return(innerWidth*MAX_TRAVEL_FRACTION)/3000;}
+
+/* ---------------- DUCK RENDER ---------------- */
 function renderDuck(){
   measureDuck();
   const minCX=duckSize.w/2,maxCX=innerWidth-duckSize.w/2,
-  minCY=duckSize.h/2,maxCY=innerHeight-duckSize.h/2;
+        minCY=duckSize.h/2,maxCY=innerHeight-duckSize.h/2;
   duck.bx=clamp(duck.bx,minCX,maxCX);
   duck.by=clamp(duck.by,minCY+duckSize.h/2,maxCY+duckSize.h/2);
   bigDuckEl.style.left=duck.bx+'px';
@@ -110,15 +132,17 @@ function renderDuck(){
 }
 function getRearMidpoint(){
   measureDuck();
-  const cx=duck.bx,cy=duck.by-duckSize.h/2,
-  left=cx-duckSize.w/2,right=cx+duckSize.w/2,bottom=cy+duckSize.h/2,
-  rearX=facingRight?left:right,rearY=bottom;
-  return{x:(cx+rearX)/2,y:(cy+rearY)/2};
+  const cx=duck.bx, cy=duck.by-duckSize.h/2;
+  const left=cx-duckSize.w/2, right=cx+duckSize.w/2, bottom=cy+duckSize.h/2;
+  const rearX=facingRight?left:right, rearY=bottom;
+  return {x:(cx+rearX)/2,y:(cy+rearY)/2};
 }
+
+/* ---------------- RIPPLE EFFECT ---------------- */
 function triggerRipples(){
   const r=bigDuckEl.getBoundingClientRect();
-  let headX=facingRight?(r.right-duckSize.w*0.15):(r.left+duckSize.w*0.15);
-  let headY=r.top+duckSize.h*0.15;
+  const headX=facingRight?(r.right-duckSize.w*0.15):(r.left+duckSize.w*0.15);
+  const headY=r.top+duckSize.h*0.15;
   for(let i=0;i<3;i++){
     setTimeout(()=>{
       const ripple=document.createElement('div');
@@ -130,80 +154,148 @@ function triggerRipples(){
     },i*200);
   }
 }
+
+/* ---------------- EGG / CHICK LIFECYCLE ---------------- */
 function layEgg(){
-  const now=performance.now();if(now-lastLayAt<LAY_COOLDOWN_MS)return;
-  lastLayAt=now;layBtn.classList.add('cooldown');
+  const now=performance.now(); if(now-lastLayAt<LAY_COOLDOWN_MS) return;
+  lastLayAt=now; layBtn.classList.add('cooldown');
   setTimeout(()=>layBtn.classList.remove('cooldown'),LAY_COOLDOWN_MS);
-  const f=getRearMidpoint(),base=24,offsetMag=base*rand(EGG_OFFSET_MIN_FRAC,EGG_OFFSET_MAX_FRAC),
-  ox=(Math.random()-0.5)*2*offsetMag,oy=(Math.random()-0.5)*2*offsetMag;
-  const egg=document.createElement('div');egg.className='egg';egg.textContent='🥚';
-  egg.style.left=(f.x+ox)+'px';egg.style.top=(f.y+oy)+'px';
+
+  const f=getRearMidpoint(), base=24, offsetMag=base*rand(EGG_OFFSET_MIN_FRAC,EGG_OFFSET_MAX_FRAC);
+  const ox=(Math.random()-0.5)*2*offsetMag, oy=(Math.random()-0.5)*2*offsetMag;
+
+  const egg=document.createElement('div');
+  egg.className='egg'; egg.textContent='🥚';
+  egg.style.left=(f.x+ox)+'px'; egg.style.top=(f.y+oy)+'px';
   document.body.appendChild(egg);
+
   const toHatch=rand(EGG_TO_HATCH_MS_MIN,EGG_TO_HATCH_MS_MAX);
-  setTimeout(()=>{egg.textContent='🐣';
+  setTimeout(()=>{
+    egg.textContent='🐣';
     const toChick=rand(HATCH_TO_CHICK_MS_MIN,HATCH_TO_CHICK_MS_MAX);
     setTimeout(()=>{
-      egg.textContent='🐤';egg.className='duckling';
+      egg.textContent='🐤'; egg.className='duckling';
       const d={el:egg,x:f.x+ox,y:f.y+oy,vx:0,vy:0,segUntil:0,pausedUntil:0};
-      startSegment(d,performance.now(),false);ducklings.push(d);
+      startSegment(d,performance.now(),false);
+      ducklings.push(d);
     },toChick);
   },toHatch);
 }
+
+/* ---------------- DUCKLING MOTION ---------------- */
 function startSegment(d,now,rally){
   const maxS=maxSpeedPxPerMs();
   let speed=maxS*rand(0.4,1.0);
-  if(rally)speed*=rand(1,5);
+  if(rally) speed*=rand(1,5); // honk speed boost
   let angle;
   if(rally){
-    const f=getRearMidpoint(),dx=f.x-d.x,dy=f.y-d.y;
+    const f=getRearMidpoint(), dx=f.x-d.x, dy=f.y-d.y;
     const base=Math.atan2(dy,dx);
     const dev=degToRad(rand(0,CALL_ANGLE_DEVIATION_DEG))*(Math.random()<0.5?-1:1);
     angle=base+dev;
-  }else angle=rand(0,Math.PI*2);
-  d.vx=Math.cos(angle)*speed;d.vy=Math.sin(angle)*speed;
+  }else{
+    angle=rand(0,Math.PI*2);
+  }
+  d.vx=Math.cos(angle)*speed; d.vy=Math.sin(angle)*speed;
   d.segUntil=now+rand(SEG_MIN_MS,SEG_MAX_MS);
 }
-function maybePause(d,now){if(Math.random()<PAUSE_CHANCE)d.pausedUntil=now+rand(PAUSE_MIN_MS,PAUSE_MAX_MS);else d.pausedUntil=0;}
+function maybePause(d,now){
+  if(Math.random()<PAUSE_CHANCE) d.pausedUntil=now+rand(PAUSE_MIN_MS,PAUSE_MAX_MS);
+  else d.pausedUntil=0;
+}
 function updateDucklings(dt,now){
-  const rally=now<rallyUntil,duckBottom=duck.by;
+  const rally=now<rallyUntil;
   for(const d of ducklings){
-    if(d.pausedUntil&&now<d.pausedUntil)continue;
-    if(!d.segUntil||now>=d.segUntil){maybePause(d,now);
-      if(d.pausedUntil&&now<d.pausedUntil)continue;
-      startSegment(d,now,rally);}
-    d.x+=d.vx*dt;d.y+=d.vy*dt;
-    d.el.style.left=d.x+'px';d.el.style.top=d.y+'px';
+    if(d.pausedUntil && now<d.pausedUntil) continue;
+    if(!d.segUntil || now>=d.segUntil){
+      maybePause(d,now);
+      if(d.pausedUntil && now<d.pausedUntil) continue;
+      startSegment(d,now,rally);
+    }
+    d.x+=d.vx*dt; d.y+=d.vy*dt;
+    d.el.style.left=d.x+'px'; d.el.style.top=d.y+'px';
     d.el.style.transform=`translate(-50%,-50%) scaleX(${d.vx>0?-1:1})`;
-    const rect=d.el.getBoundingClientRect(),childBottom=rect.top+rect.height;
-    d.el.style.zIndex=(childBottom>duckBottom)?12:8;
   }
 }
+
+/* ---------------- GLOBAL DEPTH SORT ---------------- */
+/* Sort all eggs/hatchlings/chicks every frame by bottom Y.
+   Items below the duck's feet get z > 10 (front), above get z < 10 (back).
+   Within each side, deeper items get higher z. */
+function updateDepthOrdering(){
+  const duckBottom=duck.by;
+
+  // Collect all non-duck entities
+  const eggs = Array.from(document.querySelectorAll('.egg'));
+  const chicks = Array.from(document.querySelectorAll('.duckling'));
+  const entities = eggs.concat(chicks);
+
+  // Compute bottoms
+  const withBottom = entities.map(el=>{
+    const r=el.getBoundingClientRect();
+    return {el, bottom:r.top + r.height};
+  });
+
+  // Split into back/front relative to duck
+  const back = withBottom.filter(o => o.bottom <= duckBottom);
+  const front = withBottom.filter(o => o.bottom > duckBottom);
+
+  // Sort each by bottom (ascending)
+  back.sort((a,b)=>a.bottom - b.bottom);
+  front.sort((a,b)=>a.bottom - b.bottom);
+
+  // Assign z-index tiers
+  // Back gets 5..9..., front gets 11..(up)
+  back.forEach((o,i)=>{ o.el.style.zIndex = 5 + i; });
+  front.forEach((o,i)=>{ o.el.style.zIndex = 11 + i; });
+
+  // Ensure big duck stays in middle plane
+  bigDuckEl.style.zIndex = 10;
+}
+
+/* ---------------- COUNTER ---------------- */
+function updateCounter(){
+  // Eggs & hatchlings are .egg; distinguish by textContent
+  const eggs = Array.from(document.querySelectorAll('.egg')).filter(n=>n.textContent==='🥚').length;
+  const hatch = Array.from(document.querySelectorAll('.egg')).filter(n=>n.textContent==='🐣').length;
+  const chicks = document.querySelectorAll('.duckling').length; // 🐤
+  const spans = counterEl.querySelectorAll('span');
+  if (spans[0]) spans[0].textContent = `🥚 ${eggs}`;
+  if (spans[1]) spans[1].textContent = `🐣 ${hatch}`;
+  if (spans[2]) spans[2].textContent = `🐤 ${chicks}`;
+}
+
+/* ---------------- INPUT & CONTROLS ---------------- */
 function pressVisual(el,on){el.classList.toggle('pressed',on);}
 for(const b of[callBtn,layBtn,modeBtn]){
   ['mousedown','touchstart'].forEach(ev=>b.addEventListener(ev,e=>{e.preventDefault();pressVisual(b,true);},{passive:false}));
-  ['mouseup','touchend','mouseleave'].forEach(ev=>b.addEventListener(ev,e=>{pressVisual(b,false);},{passive:false}));
+  ['mouseup','touchend','mouseleave'].forEach(ev=>b.addEventListener(ev,()=>{pressVisual(b,false);},{passive:false}));
 }
 function triggerCall(){
-  const now=performance.now();if(now-lastCallAt<CALL_COOLDOWN_MS)return;
-  lastCallAt=now;callBtn.classList.add('cooldown');
+  const now=performance.now(); if(now-lastCallAt<CALL_COOLDOWN_MS) return;
+  lastCallAt=now; callBtn.classList.add('cooldown');
   setTimeout(()=>callBtn.classList.remove('cooldown'),CALL_COOLDOWN_MS);
-  honkEl.currentTime=0;honkEl.play().catch(()=>{});
+  try{honkEl.currentTime=0;honkEl.play();}catch{}
   triggerRipples();
-  rallyUntil=Math.max(rallyUntil,now+rand(CALL_FOCUS_MIN_MS,CALL_FOCUS_MAX_MS));
+  rallyUntil=Math.max(rallyUntil, now + rand(CALL_FOCUS_MIN_MS, CALL_FOCUS_MAX_MS));
 }
 callBtn.addEventListener('touchstart',triggerCall,{passive:false});
 callBtn.addEventListener('mousedown',triggerCall);
 layBtn.addEventListener('touchstart',layEgg,{passive:false});
 layBtn.addEventListener('mousedown',layEgg);
+
+/* ---------------- MOTION TOGGLE (Touch/Gyro) ---------------- */
 async function toggleMotionMode(){
   useGyro=!useGyro;
   const w=window;
-  if(useGyro&&w.DeviceOrientationEvent&&typeof w.DeviceOrientationEvent.requestPermission==='function'){
-    try{const p=await w.DeviceOrientationEvent.requestPermission();if(p!=='granted'){useGyro=false;return;}}
-    catch{useGyro=false;return;}
+  if(useGyro && w.DeviceOrientationEvent && typeof w.DeviceOrientationEvent.requestPermission==='function'){
+    try{
+      const p=await w.DeviceOrientationEvent.requestPermission();
+      if(p!=='granted'){useGyro=false;return;}
+    }catch{useGyro=false;return;}
   }
   if(useGyro){
-    gyro.baseBeta=gyro.beta;gyro.baseGamma=gyro.gamma;
+    gyro.baseBeta=gyro.beta; gyro.baseGamma=gyro.gamma;
     modeBtn.classList.add('active-mode');
     window.addEventListener('deviceorientation',onDeviceOrientation,true);
   }else{
@@ -213,42 +305,54 @@ async function toggleMotionMode(){
 }
 modeBtn.addEventListener('touchstart',toggleMotionMode,{passive:false});
 modeBtn.addEventListener('mousedown',toggleMotionMode);
-function onDeviceOrientation(e){gyro.gamma=e.gamma??0;gyro.beta=e.beta??0;}
+function onDeviceOrientation(e){gyro.gamma=e.gamma??0; gyro.beta=e.beta??0;}
+
+/* ---------------- TOUCH & KEYBOARD ---------------- */
 document.addEventListener('touchmove',e=>{
-  if(useGyro)return;
+  if(useGyro) return;
   for(const t of e.touches){
-    if(t.clientY<innerHeight*(1-CONTROL_BAR_FRACTION)){
-      const dx=t.clientX-duck.bx;if(Math.abs(dx)>0.5)facingRight=dx>0;
-      duck.bx=t.clientX;duck.by=t.clientY;renderDuck();
+    if(t.clientY < innerHeight*(1-CONTROL_BAR_FRACTION)){
+      const dx=t.clientX - duck.bx; if(Math.abs(dx)>0.5) facingRight = dx>0;
+      duck.bx=t.clientX; duck.by=t.clientY; renderDuck();
     }
   }
 },{passive:false});
+
 document.addEventListener('keydown',e=>{
-  keys[e.key]=true;if(e.key===' '){e.preventDefault();triggerCall();}
+  keys[e.key]=true;
+  if(e.key===' '){ e.preventDefault(); triggerCall(); }
 });
-document.addEventListener('keyup',e=>{keys[e.key]=false;});
+document.addEventListener('keyup',e=>{ keys[e.key]=false; });
+
+/* ---------------- GYRO / KEY MOVE ---------------- */
 function moveDuckByKeysAndGyro(dt){
   if(!useGyro){
     let vx=0,vy=0;
-    if(keys['ArrowLeft'])vx-=5;if(keys['ArrowRight'])vx+=5;
-    if(keys['ArrowUp'])vy-=5;if(keys['ArrowDown'])vy+=5;
-    if(vx||vy){if(vx)facingRight=vx>0;duck.bx+=vx;duck.by+=vy;renderDuck();}
+    if(keys['ArrowLeft'])vx-=5; if(keys['ArrowRight'])vx+=5;
+    if(keys['ArrowUp'])vy-=5;   if(keys['ArrowDown'])vy+=5;
+    if(vx||vy){ if(vx) facingRight = vx>0; duck.bx+=vx; duck.by+=vy; renderDuck(); }
   }else{
-    const g=(gyro.gamma-gyro.baseGamma)||0,b=(gyro.beta-gyro.baseBeta)||0;
-    const gx=Math.abs(g)<gyroDeadzone?0:g,gb=Math.abs(b)<gyroDeadzone?0:b;
-    const tilt=Math.hypot(gx,gb),scale=Math.min(tilt/90,1),
-    maxPerMs=GYRO_MAX_PX_PER_MS*scale;
-    duck.bx+=gx*maxPerMs;duck.by+=gb*maxPerMs;if(gx)facingRight=gx>0;renderDuck();
+    const g=(gyro.gamma-gyro.baseGamma)||0, b=(gyro.beta-gyro.baseBeta)||0;
+    const gx=Math.abs(g)<gyroDeadzone?0:g, gb=Math.abs(b)<gyroDeadzone?0:b;
+    const tilt=Math.hypot(gx,gb), scale=Math.min(tilt/90,1), maxPerMs=GYRO_MAX_PX_PER_MS*scale;
+    duck.bx += gx*maxPerMs; duck.by += gb*maxPerMs;
+    if(gx) facingRight = gx>0; renderDuck();
   }
 }
+
+/* ---------------- MAIN LOOP ---------------- */
 let last=performance.now();
 function frame(ts){
-  const dt=ts-last;last=ts;
-  moveDuckByKeysAndGyro(dt);updateDucklings(dt,ts);
+  const dt=ts-last; last=ts;
+  moveDuckByKeysAndGyro(dt);
+  updateDucklings(dt,ts);
+  updateDepthOrdering();
+  updateCounter();
   requestAnimationFrame(frame);
 }
-renderDuck();requestAnimationFrame(frame);
+renderDuck(); requestAnimationFrame(frame);
 window.addEventListener('resize',renderDuck);
 </script>
+
 </body>
 </html>
