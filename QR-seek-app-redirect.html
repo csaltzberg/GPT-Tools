@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Seek by iNaturalist - Redirect</title>
+  <meta http-equiv="refresh" content="5;url=https://www.inaturalist.org/pages/seek_app" />
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      background-color: #f5f5f5;
+      color: #333;
+      margin: 0;
+      padding: 0;
+    }
+    .container {
+      max-width: 500px;
+      margin: 10% auto;
+      padding: 2rem;
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    }
+    a.store {
+      display: inline-block;
+      margin: 1rem;
+    }
+    img {
+      height: 60px;
+      border-radius: 8px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Redirecting to Seek by iNaturalist...</h1>
+    <p>If you are not automatically redirected, choose your store below:</p>
+    <div>
+      <a class="store" href="https://play.google.com/store/apps/details?id=org.inaturalist.seek">
+        <img src="https://upload.wikimedia.org/wikipedia/commons/7/78/Google_Play_Store_badge_EN.svg" alt="Get it on Google Play">
+      </a>
+      <a class="store" href="https://apps.apple.com/us/app/seek-by-inaturalist/id1353224144">
+        <img src="https://upload.wikimedia.org/wikipedia/commons/6/67/App_Store_%28iOS%29.svg" alt="Download on the App Store">
+      </a>
+    </div>
+  </div>
+
+  <script>
+    const userAgent = navigator.userAgent || navigator.vendor || window.opera;
+
+    if (/android/i.test(userAgent)) {
+      window.location.replace("https://play.google.com/store/apps/details?id=org.inaturalist.seek");
+    } else if (/iPhone|iPad|iPod/i.test(userAgent)) {
+      window.location.replace("https://apps.apple.com/us/app/seek-by-inaturalist/id1353224144");
+    }
+  </script>
+</body>
+</html>
