@@ -3,102 +3,286 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>My HTML Pages</title>
+  <meta name="color-scheme" content="light dark">
+  <title>Carl Saltzberg | Web Hub</title>
   <style>
+    :root {
+      --bg: #f4f6f8;
+      --surface: #ffffff;
+      --surface-2: #eef2f6;
+      --text: #1f2933;
+      --muted: #667085;
+      --border: #d9e0e7;
+      --accent: #1769aa;
+      --accent-text: #ffffff;
+      --shadow: 0 2px 10px rgba(0,0,0,.07);
+    }
+    @media (prefers-color-scheme: dark) {
+      :root:not([data-theme="light"]) {
+        --bg: #101418;
+        --surface: #171c21;
+        --surface-2: #20272e;
+        --text: #edf2f7;
+        --muted: #aab4bf;
+        --border: #303943;
+        --accent: #67b7f7;
+        --accent-text: #08131c;
+        --shadow: 0 2px 10px rgba(0,0,0,.25);
+      }
+    }
+    :root[data-theme="dark"] {
+      --bg: #101418;
+      --surface: #171c21;
+      --surface-2: #20272e;
+      --text: #edf2f7;
+      --muted: #aab4bf;
+      --border: #303943;
+      --accent: #67b7f7;
+      --accent-text: #08131c;
+      --shadow: 0 2px 10px rgba(0,0,0,.25);
+    }
+    * { box-sizing: border-box; }
     body {
-      font-family: Arial, sans-serif;
-      max-width: 600px;
-      margin: 2rem auto;
-      padding: 1rem;
-      background-color: #f8f9fa;
-      color: #333;
+      margin: 0;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: var(--bg);
+      color: var(--text);
     }
-    h1 {
-      text-align: center;
+    .page {
+      width: min(1100px, 100%);
+      margin: 0 auto;
+      padding: 18px;
     }
-    ul {
-      list-style-type: none;
-      padding: 0;
+    header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 14px;
     }
-    li {
-      margin: 0.5rem 0;
+    h1 { margin: 0; font-size: clamp(1.55rem, 5vw, 2.25rem); }
+    .subtitle { color: var(--muted); margin: 4px 0 0; }
+    button, input, a { font: inherit; }
+    .icon-button {
+      min-width: 44px;
+      min-height: 44px;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      background: var(--surface);
+      color: var(--text);
+      cursor: pointer;
     }
-    a {
+    .toolbar {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 10px;
+      margin-bottom: 18px;
+    }
+    .search {
+      width: 100%;
+      min-height: 48px;
+      border: 1px solid var(--border);
+      border-radius: 13px;
+      background: var(--surface);
+      color: var(--text);
+      padding: 0 14px;
+      outline: none;
+    }
+    .search:focus { border-color: var(--accent); }
+    .github-actions {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+    }
+    .action {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 46px;
+      padding: 8px 10px;
+      border-radius: 12px;
       text-decoration: none;
-      color: #0066cc;
+      text-align: center;
+      border: 1px solid var(--border);
+      background: var(--surface);
+      color: var(--text);
     }
-    a:hover {
-      text-decoration: underline;
+    .action.primary {
+      background: var(--accent);
+      color: var(--accent-text);
+      border-color: var(--accent);
+    }
+    .section {
+      margin: 0 0 14px;
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      background: var(--surface);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+    .section summary {
+      cursor: pointer;
+      padding: 14px 16px;
+      font-weight: 650;
+      user-select: none;
+    }
+    .cards {
+      padding: 0 12px 12px;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+      gap: 9px;
+    }
+    .card {
+      display: flex;
+      align-items: center;
+      gap: 11px;
+      min-height: 58px;
+      padding: 11px 12px;
+      border: 1px solid var(--border);
+      border-radius: 13px;
+      background: var(--surface-2);
+      color: var(--text);
+      text-decoration: none;
+      transition: transform .12s ease, border-color .12s ease;
+    }
+    .card:hover { transform: translateY(-1px); border-color: var(--accent); }
+    .emoji { font-size: 1.45rem; width: 30px; text-align: center; }
+    .card-title { font-weight: 600; }
+    .card-file { display: block; color: var(--muted); font-size: .78rem; margin-top: 2px; overflow-wrap: anywhere; }
+    .empty {
+      display: none;
+      padding: 20px;
+      text-align: center;
+      color: var(--muted);
+    }
+    footer { text-align: center; color: var(--muted); font-size: .85rem; padding: 10px 0 20px; }
+    @media (min-width: 700px) {
+      .toolbar { grid-template-columns: minmax(250px, 1fr) auto; }
+      .github-actions { min-width: 420px; }
+    }
+    @media (max-width: 430px) {
+      .page { padding: 12px; }
+      .github-actions { grid-template-columns: 1fr; }
+      .cards { grid-template-columns: 1fr; }
     }
   </style>
 </head>
 <body>
-  <h1>Carl Saltzberg</h1>
-  
-  
-  
-    <p>APPS:</p>
-  <ul>
-    <li><a href="QR-seek-app-redirect.html">Seek</a></li>
-    <li><a href="page2.html">Page 2</a></li>
-    <li><a href="page3.html">Page 3</a></li>
+  <main class="page">
+    <header>
+      <div>
+        <h1>Carl Saltzberg</h1>
+        <p class="subtitle">Web tools, apps, guides, and projects</p>
+      </div>
+      <button class="icon-button" id="themeButton" type="button" aria-label="Toggle light and dark mode">◐</button>
+    </header>
 
-  
-  <p>Web Tools:</p>
-  <ul>
-    <li><a href="road_trip_atlas.html">County Map Maker</a></li>
-    <li><a href="page2.html">Page 2</a></li>
-    <li><a href="page3.html">Page 3</a></li>
+    <div class="toolbar">
+      <input class="search" id="search" type="search" placeholder="Search pages…" aria-label="Search pages">
+      <nav class="github-actions" aria-label="GitHub shortcuts">
+        <a class="action primary" href="https://csaltzberg.github.io/GPT-Tools/index.html">🌐 Live Site</a>
+        <a class="action" href="https://github.com/csaltzberg/GPT-Tools/edit/main/index.html">✏️ Edit Index</a>
+        <a class="action" href="https://github.com/csaltzberg/GPT-Tools/upload/main">⬆️ Upload Files</a>
+      </nav>
+    </div>
 
-  
-  
-  
-  <p>GPTtools:</p>
-  <ul>
-    <li><a href="canvas_banner.html">Canvas Banner</a></li>
-    <li><a href="page2.html">Page 2</a></li>
-    <li><a href="page3.html">Page 3</a></li>
+    <div id="sections">
+      <details class="section" open>
+        <summary>📱 Apps</summary>
+        <div class="cards">
+          <a class="card" href="QR-seek-app-redirect.html"><span class="emoji">🔎</span><span><span class="card-title">Seek</span><span class="card-file">QR-seek-app-redirect.html</span></span></a>
+        </div>
+      </details>
 
-  <p>Articles:</p>
-  <ul>
+      <details class="section" open>
+        <summary>🧰 Web Tools</summary>
+        <div class="cards">
+          <a class="card" href="road_trip_atlas.html"><span class="emoji">🗺️</span><span><span class="card-title">County Map Maker</span><span class="card-file">road_trip_atlas.html</span></span></a>
+          <a class="card" href="TSC_OTS_Generator_v1_5.html"><span class="emoji">📅</span><span><span class="card-title">TSC OTS Generator</span><span class="card-file">TSC_OTS_Generator_v1_5.html</span></span></a>
+        </div>
+      </details>
 
-    <li><a href="Articles/Spandrels1979.html">Spandrels1979</a></li>
-  </ul>
-  
-     <p>DUCK GAME:</p>
-  <ul>
-    <li><a href="ducks.html">Ducks</a></li>
-    <li><a href="ducks_2.html">Ducks 2</a></li>
-     <li><a href="page3.html">Page 3</a></li>
- 
-  
-    
-  
-  
-  
-  
-   <p>Other:</p>
-  <ul>
-    <li><a href="confetti.html">Confetti</a></li>
-    <li><a href="page2.html">Page 2</a></li>
- 
-  
-    
-   <p>Guides:</p>
-  <ul>
-    <li><a href="switch_1_pro_controller_shell_swap.html">Nintendo Switch 1 Pro Controller Shell Swap</a></li>
-    <li><a href="page2.html">Page 2</a></li>
-    <li><a href="page3.html">Page 3</a></li>
- 
-  
-     <p>GITHUB:</p>
-  <ul>
-    <li><a href="https://csaltzberg.github.io/GPT-Tools/index.html">LIVE WEBSITE</a></li>
-    <li><a href="https://github.com/csaltzberg/GPT-Tools/upload/main">UPLOAD</a></li>
+      <details class="section" open>
+        <summary>🤖 GPT Tools</summary>
+        <div class="cards">
+          <a class="card" href="canvas_banner.html"><span class="emoji">🖼️</span><span><span class="card-title">Canvas Banner</span><span class="card-file">canvas_banner.html</span></span></a>
+        </div>
+      </details>
 
-  
-  
-  
-  
+      <details class="section">
+        <summary>📄 Articles</summary>
+        <div class="cards">
+          <a class="card" href="Articles/Spandrels1979.html"><span class="emoji">📚</span><span><span class="card-title">Spandrels 1979</span><span class="card-file">Articles/Spandrels1979.html</span></span></a>
+        </div>
+      </details>
+
+      <details class="section">
+        <summary>🦆 Duck Game</summary>
+        <div class="cards">
+          <a class="card" href="ducks.html"><span class="emoji">🦆</span><span><span class="card-title">Ducks</span><span class="card-file">ducks.html</span></span></a>
+          <a class="card" href="ducks_2.html"><span class="emoji">🐤</span><span><span class="card-title">Ducks 2</span><span class="card-file">ducks_2.html</span></span></a>
+        </div>
+      </details>
+
+      <details class="section">
+        <summary>🎉 Other</summary>
+        <div class="cards">
+          <a class="card" href="confetti.html"><span class="emoji">🎊</span><span><span class="card-title">Confetti</span><span class="card-file">confetti.html</span></span></a>
+        </div>
+      </details>
+
+      <details class="section">
+        <summary>📖 Guides</summary>
+        <div class="cards">
+          <a class="card" href="switch_1_pro_controller_shell_swap.html"><span class="emoji">🎮</span><span><span class="card-title">Nintendo Switch 1 Pro Controller Shell Swap</span><span class="card-file">switch_1_pro_controller_shell_swap.html</span></span></a>
+        </div>
+      </details>
+    </div>
+
+    <div class="empty" id="empty">No pages match your search.</div>
+    <footer>GPT-Tools Hub</footer>
+  </main>
+
+  <script>
+    const search = document.getElementById('search');
+    const sections = [...document.querySelectorAll('.section')];
+    const empty = document.getElementById('empty');
+    const themeButton = document.getElementById('themeButton');
+
+    search.addEventListener('input', () => {
+      const query = search.value.trim().toLowerCase();
+      let visibleCards = 0;
+
+      sections.forEach(section => {
+        const cards = [...section.querySelectorAll('.card')];
+        let sectionMatches = 0;
+
+        cards.forEach(card => {
+          const matches = card.textContent.toLowerCase().includes(query);
+          card.hidden = !matches;
+          if (matches) sectionMatches++;
+        });
+
+        section.hidden = sectionMatches === 0;
+        if (query && sectionMatches) section.open = true;
+        visibleCards += sectionMatches;
+      });
+
+      empty.style.display = visibleCards ? 'none' : 'block';
+    });
+
+    themeButton.addEventListener('click', () => {
+      const root = document.documentElement;
+      const current = root.dataset.theme;
+      if (!current) {
+        const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+        root.dataset.theme = prefersDark ? 'light' : 'dark';
+      } else if (current === 'dark') {
+        root.dataset.theme = 'light';
+      } else {
+        root.dataset.theme = 'dark';
+      }
+    });
+  </script>
 </body>
 </html>
