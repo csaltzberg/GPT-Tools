@@ -146,6 +146,50 @@
       transition: transform .12s ease, border-color .12s ease;
     }
     .card:hover { transform: translateY(-1px); border-color: var(--accent); }
+    .tool-group {
+      display: flex;
+      flex-direction: column;
+      min-width: 0;
+    }
+    .tool-group > .card {
+      border-radius: 13px 13px 8px 8px;
+    }
+    .versions {
+      margin: -1px 8px 0;
+      border: 1px solid var(--border);
+      border-top: 0;
+      border-radius: 0 0 10px 10px;
+      background: var(--surface);
+    }
+    .versions summary {
+      padding: 10px 12px;
+      font-size: .9rem;
+      font-weight: 600;
+      color: var(--muted);
+      cursor: pointer;
+    }
+    .version-links {
+      display: grid;
+      gap: 6px;
+      padding: 0 10px 10px;
+    }
+    .version-links a {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 9px 10px;
+      border-radius: 9px;
+      background: var(--surface-2);
+      color: var(--text);
+      text-decoration: none;
+    }
+    .version-links a:hover { outline: 1px solid var(--accent); }
+    .version-links span {
+      color: var(--muted);
+      font-size: .78rem;
+      overflow-wrap: anywhere;
+      text-align: right;
+    }
     .emoji { font-size: 1.45rem; width: 30px; text-align: center; }
     .card-title { font-weight: 600; }
     .card-file { display: block; color: var(--muted); font-size: .78rem; margin-top: 2px; overflow-wrap: anywhere; }
@@ -198,7 +242,24 @@
         <summary>🧰 Web Tools</summary>
         <div class="cards">
           <a class="card" href="road_trip_atlas.html"><span class="emoji">🗺️</span><span><span class="card-title">County Map Maker</span><span class="card-file">road_trip_atlas.html</span></span></a>
-          <a class="card" href="TSC_OTS_Generator_v1_5.html"><span class="emoji">📅</span><span><span class="card-title">TSC OTS Generator</span><span class="card-file">TSC_OTS_Generator_v1_5.html</span></span></a>
+          <div class="tool-group">
+            <a class="card" href="TSC_OTS_Generator_v1_8.html">
+              <span class="emoji">📅</span>
+              <span>
+                <span class="card-title">TSC OTS Generator</span>
+                <span class="card-file">TSC_OTS_Generator_v1_8.html · Current</span>
+              </span>
+            </a>
+            <details class="versions">
+              <summary>Older versions</summary>
+              <div class="version-links">
+                <a href="TSC_OTS_Generator_v1_5.html">
+                  <span>TSC OTS Generator v1.5</span>
+                  <span>TSC_OTS_Generator_v1_5.html</span>
+                </a>
+              </div>
+            </details>
+          </div>
         </div>
       </details>
 
@@ -254,13 +315,38 @@
       let visibleCards = 0;
 
       sections.forEach(section => {
-        const cards = [...section.querySelectorAll('.card')];
+        const standaloneCards = [...section.querySelectorAll('.cards > .card')];
+        const toolGroups = [...section.querySelectorAll('.tool-group')];
         let sectionMatches = 0;
 
-        cards.forEach(card => {
+        standaloneCards.forEach(card => {
           const matches = card.textContent.toLowerCase().includes(query);
           card.hidden = !matches;
           if (matches) sectionMatches++;
+        });
+
+        toolGroups.forEach(toolGroup => {
+          const currentCard = toolGroup.querySelector('.card');
+          const versionGroup = toolGroup.querySelector('.versions');
+          const versionLinks = versionGroup ? [...versionGroup.querySelectorAll('.version-links a')] : [];
+          const currentMatches = currentCard.textContent.toLowerCase().includes(query);
+          let archivedMatches = 0;
+
+          versionLinks.forEach(link => {
+            const matches = link.textContent.toLowerCase().includes(query);
+            link.hidden = query ? !matches : false;
+            if (matches) archivedMatches++;
+          });
+
+          const groupMatches = currentMatches || archivedMatches > 0 || !query;
+          toolGroup.hidden = !groupMatches;
+
+          if (versionGroup) {
+            versionGroup.hidden = false;
+            if (query && archivedMatches > 0) versionGroup.open = true;
+          }
+
+          if (groupMatches) sectionMatches++;
         });
 
         section.hidden = sectionMatches === 0;
