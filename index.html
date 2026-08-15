@@ -161,6 +161,40 @@
       border-radius: 0 0 10px 10px;
       background: var(--surface);
     }
+
+    .alternatives {
+      margin: -1px 8px 0;
+      border: 1px solid var(--border);
+      border-top: 0;
+      border-radius: 0 0 10px 10px;
+      background: var(--surface);
+      padding: 8px 10px 10px;
+    }
+    .alternative-label {
+      display: block;
+      margin: 0 2px 6px;
+      color: var(--muted);
+      font-size: .78rem;
+      font-weight: 600;
+    }
+    .alternatives a {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 9px 10px;
+      border-radius: 9px;
+      background: var(--surface-2);
+      color: var(--text);
+      text-decoration: none;
+    }
+    .alternatives a:hover { outline: 1px solid var(--accent); }
+    .alternatives a span:last-child {
+      color: var(--muted);
+      font-size: .78rem;
+      overflow-wrap: anywhere;
+      text-align: right;
+    }
+
     .versions summary {
       padding: 10px 12px;
       font-size: .9rem;
@@ -304,6 +338,29 @@
         </div>
       </details>
 
+
+      <details class="section">
+        <summary>🧱 LEGO</summary>
+        <div class="cards">
+          <div class="tool-group">
+            <a class="card" href="Lego/SkywalkerSaga/lego_star_wars_skywalker _saga_codes.html">
+              <span class="emoji">🌐</span>
+              <span>
+                <span class="card-title">LEGO Star Wars: The Skywalker Saga Codes</span>
+                <span class="card-file">Webpage</span>
+              </span>
+            </a>
+            <div class="alternatives">
+              <span class="alternative-label">Also available as</span>
+              <a href="Lego/SkywalkerSaga/lego_star_wars_skywalker _saga_codes.pdf" target="_blank" rel="noopener">
+                <span>🖨️ Printable PDF</span>
+                <span>lego_star_wars_skywalker _saga_codes.pdf</span>
+              </a>
+            </div>
+          </div>
+        </div>
+      </details>
+
       <details class="section">
         <summary>📖 Guides</summary>
         <div class="cards">
@@ -341,8 +398,16 @@
           const currentCard = toolGroup.querySelector('.card');
           const versionGroup = toolGroup.querySelector('.versions');
           const versionLinks = versionGroup ? [...versionGroup.querySelectorAll('.version-links a')] : [];
+          const alternativeLinks = [...toolGroup.querySelectorAll('.alternatives a')];
           const currentMatches = currentCard.textContent.toLowerCase().includes(query);
           let archivedMatches = 0;
+          let alternativeMatches = 0;
+
+          alternativeLinks.forEach(link => {
+            const matches = link.textContent.toLowerCase().includes(query);
+            link.hidden = query ? !matches : false;
+            if (matches) alternativeMatches++;
+          });
 
           versionLinks.forEach(link => {
             const matches = link.textContent.toLowerCase().includes(query);
@@ -350,7 +415,7 @@
             if (matches) archivedMatches++;
           });
 
-          const groupMatches = currentMatches || archivedMatches > 0 || !query;
+          const groupMatches = currentMatches || archivedMatches > 0 || alternativeMatches > 0 || !query;
           toolGroup.hidden = !groupMatches;
 
           if (versionGroup) {
