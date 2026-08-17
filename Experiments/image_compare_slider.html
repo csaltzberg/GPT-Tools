@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Image Comparison Slider Playground</title>
+<style>
+  :root {
+    --page-bg:#f4f6f8;
+    --panel-bg:#ffffff;
+    --text:#17202a;
+    --muted:#667085;
+    --border:#d0d5dd;
+    --accent:#2563eb;
+    --handle:#ffffff;
+    --divider:#ffffff;
+    --shadow:0 10px 30px rgba(16,24,40,.08);
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0;
+    font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+    background:var(--page-bg);
+    color:var(--text);
+  }
+  header{
+    padding:28px 20px 14px;
+    max-width:1200px;
+    margin:auto;
+  }
+  h1{margin:0 0 8px;font-size:clamp(1.7rem,4vw,2.5rem)}
+  .lead{margin:0;color:var(--muted);max-width:850px;line-height:1.55}
+  main{
+    max-width:1200px;
+    margin:auto;
+    padding:14px 20px 40px;
+    display:grid;
+    grid-template-columns:minmax(0,1fr) 340px;
+    gap:22px;
+  }
+  .card{
+    background:var(--panel-bg);
+    border:1px solid var(--border);
+    border-radius:16px;
+    box-shadow:var(--shadow);
+  }
+  .viewer-card{padding:16px}
+  .toolbar{
+    display:flex;
+    flex-wrap:wrap;
+    gap:10px;
+    align-items:center;
+    margin-bottom:14px;
+  }
+  button,select,input[type="text"]{
+    font:inherit;
+  }
+  button{
+    border:1px solid var(--border);
+    background:#fff;
+    color:var(--text);
+    padding:9px 12px;
+    border-radius:10px;
+    cursor:pointer;
+  }
+  button:hover{border-color:#98a2b3}
+  button.active{background:var(--accent);color:#fff;border-color:var(--accent)}
+
+  .compare-wrap{
+    position:relative;
+    width:100%;
+    overflow:hidden;
+    border-radius:14px;
+    background:#111;
+    aspect-ratio:16/10;
+    touch-action:none;
+    user-select:none;
+  }
+  .compare-wrap img{
+    position:absolute;
+    inset:0;
+    width:100%;
+    height:100%;
+    object-fit:cover;
+    display:block;
+    pointer-events:none;
+  }
+  .after{z-index:1}
+  .before-layer{
+    position:absolute;
+    inset:0;
+    z-index:2;
+    overflow:hidden;
+  }
+  .before-layer img{z-index:2}
+
+  .divider{
+    position:absolute;
+    z-index:4;
+    background:var(--divider);
+    box-shadow:0 0 0 1px rgba(0,0,0,.18),0 0 12px rgba(0,0,0,.22);
+    pointer-events:none;
+  }
+  .handle{
+    position:absolute;
+    z-index:5;
+    width:44px;
+    height:44px;
+    border-radius:999px;
+    background:var(--handle);
+    border:1px solid rgba(0,0,0,.2);
+    box-shadow:0 4px 16px rgba(0,0,0,.25);
+    display:grid;
+    place-items:center;
+    font-weight:800;
+    color:#111827;
+    pointer-events:none;
+  }
+  .handle::before{content:"↔"}
+  .vertical .handle::before{content:"↕"}
+
+  .label{
+    position:absolute;
+    top:12px;
+    z-index:6;
+    padding:6px 9px;
+    border-radius:8px;
+    background:rgba(0,0,0,.6);
+    color:white;
+    font-size:.84rem;
+    backdrop-filter:blur(4px);
+    pointer-events:none;
+  }
+  .label.before-label{left:12px}
+  .label.after-label{right:12px}
+
+  .range-overlay{
+    position:absolute;
+    inset:0;
+    z-index:7;
+    width:100%;
+    height:100%;
+    opacity:0;
+    cursor:ew-resize;
+  }
+  .vertical .range-overlay{cursor:ns-resize}
+
+  .side-mode .after{left:50%;width:50%;}
+  .side-mode .before-layer{left:0;width:50%;right:auto;clip-path:none!important;opacity:1!important;}
+  .side-mode .divider,.side-mode .handle,.side-mode .range-overlay{display:none!important;}
+  .side-mode .before-label{left:12px;}
+  .side-mode .after-label{right:12px;}
+
+  .fade-mode .before-layer{overflow:visible}
+  .fade-mode .divider,.fade-mode .handle{display:none}
+  .fade-mode .range-overlay{cursor:ew-resize}
+
+  .controls{padding:18px}
+  .controls h2{font-size:1.05rem;margin:0 0 14px}
+  .group{padding:13px 0;border-top:1px solid #eaecf0}
+  .group:first-of-type{border-top:0;padding-top:0}
+  .group label{display:block;font-size:.88rem;font-weight:650;margin-bottom:7px}
+  .row{display:grid;grid-template-columns:1fr auto;gap:10px;align-items:center}
+  input[type="range"]{width:100%}
+  .value{font-variant-numeric:tabular-nums;color:var(--muted);min-width:54px;text-align:right}
+  select,input[type="text"]{
+    width:100%;
+    padding:9px 10px;
+    border:1px solid var(--border);
+    border-radius:9px;
+    background:white;
+  }
+  .check{display:flex!important;align-items:center;gap:8px;font-weight:500!important}
+  .small{font-size:.8rem;color:var(--muted);line-height:1.45}
+  .code-note{margin-top:14px;padding:12px;border-radius:10px;background:#f8fafc;color:#475467;font-size:.84rem;line-height:1.45}
+
+  @media(max-width:900px){
+    main{grid-template-columns:1fr}
+    .controls{order:-1}
+  }
+</style>
+</head>
+<body>
+<header>
+  <h1>Image Comparison Slider Playground</h1>
+  <p class="lead">Experiment with several ways to compare two images: horizontal reveal, vertical reveal, opacity fade, and side-by-side. Drag directly on the image or use the controls.</p>
+</header>
+
+<main>
+  <section class="card viewer-card">
+    <div class="toolbar" aria-label="Comparison modes">
+      <button data-mode="horizontal" class="active">Horizontal slider</button>
+      <button data-mode="vertical">Vertical slider</button>
+      <button data-mode="fade">Opacity fade</button>
+      <button data-mode="side">Side by side</button>
+      <button id="resetBtn">Reset</button>
+    </div>
+
+    <div id="compare" class="compare-wrap" aria-label="Interactive image comparison">
+      <img id="afterImg" class="after" alt="After image" />
+      <div id="beforeLayer" class="before-layer">
+        <img id="beforeImg" alt="Before image" />
+      </div>
+      <div class="label before-label" id="beforeLabel">Before</div>
+      <div class="label after-label" id="afterLabel">After</div>
+      <div id="divider" class="divider"></div>
+      <div id="handle" class="handle"></div>
+      <input id="overlayRange" class="range-overlay" type="range" min="0" max="100" value="50" aria-label="Image comparison position" />
+    </div>
+  </section>
+
+  <aside class="card controls">
+    <h2>Playground Settings</h2>
+
+    <div class="group">
+      <label for="position">Reveal / opacity amount</label>
+      <div class="row">
+        <input id="position" type="range" min="0" max="100" value="50" />
+        <span class="value" id="positionValue">50%</span>
+      </div>
+    </div>
+
+    <div class="group">
+      <label for="handleSize">Handle size</label>
+      <div class="row">
+        <input id="handleSize" type="range" min="24" max="80" value="44" />
+        <span class="value" id="handleSizeValue">44 px</span>
+      </div>
+    </div>
+
+    <div class="group">
+      <label for="dividerSize">Divider thickness</label>
+      <div class="row">
+        <input id="dividerSize" type="range" min="1" max="10" value="3" />
+        <span class="value" id="dividerSizeValue">3 px</span>
+      </div>
+    </div>
+
+    <div class="group">
+      <label for="fitMode">Image fit</label>
+      <select id="fitMode">
+        <option value="cover">Cover</option>
+        <option value="contain">Contain</option>
+        <option value="fill">Stretch / fill</option>
+      </select>
+    </div>
+
+    <div class="group">
+      <label class="check"><input id="showLabels" type="checkbox" checked /> Show Before / After labels</label>
+      <label class="check"><input id="showHandle" type="checkbox" checked /> Show drag handle</label>
+      <label class="check"><input id="showDivider" type="checkbox" checked /> Show divider line</label>
+    </div>
+
+    <div class="group">
+      <label for="beforeText">Before label</label>
+      <input id="beforeText" type="text" value="Before" />
+      <div style="height:9px"></div>
+      <label for="afterText">After label</label>
+      <input id="afterText" type="text" value="After" />
+    </div>
+
+    <div class="group">
+      <label>Try your own images</label>
+      <div class="small">Select two local images. They are previewed only in your browser and are not uploaded anywhere.</div>
+      <div style="height:9px"></div>
+      <label for="beforeFile">Before image</label>
+      <input id="beforeFile" type="file" accept="image/*" />
+      <div style="height:9px"></div>
+      <label for="afterFile">After image</label>
+      <input id="afterFile" type="file" accept="image/*" />
+    </div>
+
+    <div class="code-note">
+      <strong>Modes:</strong> Horizontal and vertical use a clipped overlay. Fade changes the upper image's opacity. Side-by-side removes the slider entirely for a conventional comparison.
+    </div>
+  </aside>
+</main>
+
+<script>
+const compare = document.getElementById('compare');
+const beforeImg = document.getElementById('beforeImg');
+const afterImg = document.getElementById('afterImg');
+const beforeLayer = document.getElementById('beforeLayer');
+const divider = document.getElementById('divider');
+const handle = document.getElementById('handle');
+const overlayRange = document.getElementById('overlayRange');
+const position = document.getElementById('position');
+const positionValue = document.getElementById('positionValue');
+const beforeLabel = document.getElementById('beforeLabel');
+const afterLabel = document.getElementById('afterLabel');
+
+let mode = 'horizontal';
+
+function svgData(title, subtitle, bg1, bg2, accent, circles=false){
+  const extras = circles ? `
+    <circle cx="160" cy="180" r="82" fill="${accent}" opacity=".24"/>
+    <circle cx="660" cy="400" r="130" fill="${accent}" opacity=".20"/>
+    <circle cx="480" cy="170" r="58" fill="${accent}" opacity=".16"/>` : `
+    <path d="M0 410 C150 330 260 520 420 430 S720 330 960 440 V600 H0 Z" fill="${accent}" opacity=".25"/>
+    <rect x="110" y="150" width="210" height="160" rx="30" fill="${accent}" opacity=".18"/>
+    <rect x="620" y="220" width="180" height="210" rx="36" fill="${accent}" opacity=".18"/>`;
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="960" height="600" viewBox="0 0 960 600">
+    <defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop stop-color="${bg1}"/><stop offset="1" stop-color="${bg2}"/></linearGradient></defs>
+    <rect width="960" height="600" fill="url(#g)"/>
+    ${extras}
+    <text x="55" y="88" font-family="system-ui, sans-serif" font-size="46" font-weight="700" fill="white">${title}</text>
+    <text x="58" y="130" font-family="system-ui, sans-serif" font-size="22" fill="white" opacity=".86">${subtitle}</text>
+    <text x="55" y="555" font-family="system-ui, sans-serif" font-size="18" fill="white" opacity=".72">Built-in demo image</text>
+  </svg>`;
+  return 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(svg);
+}
+
+beforeImg.src = svgData('BEFORE', 'Original design', '#614385', '#516395', '#ffdd57', false);
+afterImg.src  = svgData('AFTER', 'Revised design', '#0f766e', '#2563eb', '#a7f3d0', true);
+
+function setPosition(v){
+  v = Number(v);
+  position.value = v;
+  overlayRange.value = v;
+  positionValue.textContent = `${Math.round(v)}%`;
+
+  if(mode === 'horizontal'){
+    beforeLayer.style.opacity = 1;
+    beforeLayer.style.clipPath = `inset(0 ${100-v}% 0 0)`;
+    divider.style.left = `calc(${v}% - ${divider.offsetWidth/2}px)`;
+    divider.style.top = '0'; divider.style.bottom = '0'; divider.style.width = `${document.getElementById('dividerSize').value}px`; divider.style.height = 'auto';
+    handle.style.left = `${v}%`; handle.style.top = '50%'; handle.style.transform = 'translate(-50%,-50%)';
+  } else if(mode === 'vertical'){
+    beforeLayer.style.opacity = 1;
+    beforeLayer.style.clipPath = `inset(0 0 ${100-v}% 0)`;
+    divider.style.top = `calc(${v}% - ${divider.offsetHeight/2}px)`;
+    divider.style.left = '0'; divider.style.right = '0'; divider.style.height = `${document.getElementById('dividerSize').value}px`; divider.style.width = 'auto';
+    handle.style.left = '50%'; handle.style.top = `${v}%`; handle.style.transform = 'translate(-50%,-50%)';
+  } else if(mode === 'fade'){
+    beforeLayer.style.clipPath = 'none';
+    beforeLayer.style.opacity = v/100;
+  }
+}
+
+function applyMode(newMode){
+  mode = newMode;
+  document.querySelectorAll('[data-mode]').forEach(b=>b.classList.toggle('active', b.dataset.mode===mode));
+  compare.classList.toggle('vertical', mode==='vertical');
+  compare.classList.toggle('fade-mode', mode==='fade');
+  compare.classList.toggle('side-mode', mode==='side');
+  beforeImg.style.objectFit = afterImg.style.objectFit = document.getElementById('fitMode').value;
+  if(mode==='side'){
+    beforeLayer.style.clipPath='none';
+    beforeLayer.style.opacity=1;
+  } else {
+    setPosition(position.value);
+  }
+}
+
+document.querySelectorAll('[data-mode]').forEach(btn=>btn.addEventListener('click',()=>applyMode(btn.dataset.mode)));
+
+position.addEventListener('input', e=>setPosition(e.target.value));
+overlayRange.addEventListener('input', e=>setPosition(e.target.value));
+
+function pointToPercent(e){
+  const r = compare.getBoundingClientRect();
+  const t = e.touches ? e.touches[0] : e;
+  const raw = mode==='vertical' ? ((t.clientY-r.top)/r.height)*100 : ((t.clientX-r.left)/r.width)*100;
+  return Math.max(0,Math.min(100,raw));
+}
+let dragging=false;
+compare.addEventListener('pointerdown',e=>{if(mode!=='side'){dragging=true; compare.setPointerCapture?.(e.pointerId); setPosition(pointToPercent(e));}});
+compare.addEventListener('pointermove',e=>{if(dragging && mode!=='side')setPosition(pointToPercent(e));});
+compare.addEventListener('pointerup',()=>dragging=false);
+compare.addEventListener('pointercancel',()=>dragging=false);
+
+document.getElementById('handleSize').addEventListener('input', e=>{
+  handle.style.width=handle.style.height=`${e.target.value}px`;
+  document.getElementById('handleSizeValue').textContent=`${e.target.value} px`;
+});
+document.getElementById('dividerSize').addEventListener('input', e=>{
+  document.getElementById('dividerSizeValue').textContent=`${e.target.value} px`;
+  setPosition(position.value);
+});
+document.getElementById('fitMode').addEventListener('change', e=>{
+  beforeImg.style.objectFit=afterImg.style.objectFit=e.target.value;
+});
+document.getElementById('showLabels').addEventListener('change', e=>{
+  beforeLabel.style.display=afterLabel.style.display=e.target.checked?'block':'none';
+});
+document.getElementById('showHandle').addEventListener('change', e=>handle.style.display=e.target.checked?'grid':'none');
+document.getElementById('showDivider').addEventListener('change', e=>divider.style.display=e.target.checked?'block':'none');
+document.getElementById('beforeText').addEventListener('input', e=>beforeLabel.textContent=e.target.value);
+document.getElementById('afterText').addEventListener('input', e=>afterLabel.textContent=e.target.value);
+
+function loadFile(input,img){
+  input.addEventListener('change',()=>{
+    const file=input.files?.[0]; if(!file)return;
+    const url=URL.createObjectURL(file);
+    img.onload=()=>URL.revokeObjectURL(url);
+    img.src=url;
+  });
+}
+loadFile(document.getElementById('beforeFile'),beforeImg);
+loadFile(document.getElementById('afterFile'),afterImg);
+
+document.getElementById('resetBtn').addEventListener('click',()=>{
+  position.value=50;
+  setPosition(50);
+});
+
+setPosition(50);
+</script>
+</body>
+</html>

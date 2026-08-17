@@ -1,0 +1,107 @@
+<!doctype html>
+
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Confetti Button</title>
+  <style>
+    html, body {
+      height: 100%;
+      margin: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background: #f8f8f8;
+    }
+    button {
+      width: 120px;
+      height: 120px;
+      border-radius: 50%;
+      border: none;
+      background: red;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+      cursor: pointer;
+      transition: transform 0.1s ease, box-shadow 0.1s ease;
+      outline: none;
+      -webkit-tap-highlight-color: transparent;
+    }
+    button:active {
+      transform: scale(0.9);
+      box-shadow: 0 4px 10px rgba(0,0,0,0.4);
+    }
+    button:focus { outline: none; }
+  </style>
+</head>
+<body>
+  <button id="confettiBtn"></button>  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>  <script>
+    const btn = document.getElementById('confettiBtn');
+    let intervalId;
+
+    // Default pull values
+    let phoneGravity = 1.5;
+    let phoneDrift = 0;
+
+    function handleOrientation(event) {
+      const gamma = event.gamma || 0; // left/right tilt [-90,90]
+      const beta = event.beta || 0;   // front/back tilt [-180,180]
+
+      const radGamma = gamma * (Math.PI / 180);
+      const radBeta = beta * (Math.PI / 180);
+
+      // Approximate down vector
+      const downX = Math.sin(radGamma);
+      const downY = Math.sin(radBeta);
+
+      // Stronger sideways effect
+      phoneDrift = downX * 6;
+      phoneGravity = Math.abs(downY) * 3;
+    }
+
+    if (window.DeviceOrientationEvent) {
+      if (typeof DeviceOrientationEvent.requestPermission === 'function') {
+        DeviceOrientationEvent.requestPermission()
+          .then(state => {
+            if (state === 'granted') {
+              window.addEventListener('deviceorientation', handleOrientation, true);
+            }
+          })
+          .catch(console.error);
+      } else {
+        window.addEventListener('deviceorientation', handleOrientation, true);
+      }
+    }
+
+    function burst() {
+      confetti({
+        particleCount: 10,
+        spread: 60,
+        startVelocity: 30,
+        gravity: phoneGravity,
+        drift: phoneDrift,
+        origin: { x: 0.5, y: 0.5 }
+      });
+    }
+
+    btn.addEventListener('mousedown', () => {
+      burst();
+      intervalId = setInterval(burst, 50);
+    });
+
+    // Stop confetti on mouse release anywhere
+    document.addEventListener('mouseup', () => {
+      clearInterval(intervalId);
+    });
+
+    // Touch support for mobile
+    btn.addEventListener('touchstart', () => {
+      burst();
+      intervalId = setInterval(burst, 50);
+    }, { passive: true });
+
+    // Stop confetti on touch release anywhere
+    document.addEventListener('touchend', () => {
+      clearInterval(intervalId);
+    });
+  </script></body>
+</html>
