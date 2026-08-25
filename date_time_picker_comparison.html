@@ -1,0 +1,723 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Date & Time Picker Comparison</title>
+<style>
+  :root {
+    color-scheme: light dark;
+    --bg: #f5f7fa;
+    --card: #ffffff;
+    --text: #18212b;
+    --muted: #5e6b78;
+    --border: #cfd7df;
+    --accent: #1769aa;
+    --accent-soft: #eaf3fb;
+    --disabled: #eef1f4;
+    --disabled-text: #8a949e;
+    --success: #176b3a;
+    --warning: #8a5200;
+    --error: #a32020;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #11161c;
+      --card: #1a2129;
+      --text: #edf2f7;
+      --muted: #a9b5c1;
+      --border: #3c4854;
+      --accent: #73b7ef;
+      --accent-soft: #1d3347;
+      --disabled: #252d35;
+      --disabled-text: #77838f;
+      --success: #7bd39a;
+      --warning: #e5b96c;
+      --error: #f28b8b;
+    }
+  }
+
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    line-height: 1.45;
+  }
+  main {
+    max-width: 980px;
+    margin: 0 auto;
+    padding: 18px 14px 48px;
+  }
+  h1 { font-size: 1.55rem; margin: 0 0 8px; }
+  h2 { font-size: 1.25rem; margin: 30px 0 10px; }
+  h3 { font-size: 1.03rem; margin: 0; }
+  p { margin: 7px 0; }
+  .intro { color: var(--muted); margin-bottom: 18px; }
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 14px;
+  }
+  @media (max-width: 720px) {
+    .grid { grid-template-columns: 1fr; }
+  }
+  .card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 15px;
+    min-width: 0;
+  }
+  .badge {
+    display: inline-block;
+    margin-left: 7px;
+    padding: 2px 7px;
+    border-radius: 999px;
+    font-size: .72rem;
+    font-weight: 700;
+    vertical-align: 1px;
+    color: var(--accent);
+    background: var(--accent-soft);
+  }
+  .explain {
+    color: var(--muted);
+    font-size: .9rem;
+    min-height: 2.5em;
+  }
+  label {
+    display: block;
+    font-weight: 650;
+    margin: 12px 0 6px;
+  }
+  input, select, button {
+    font: inherit;
+  }
+  input[type="date"], input[type="time"], select, .picker-field {
+    width: 100%;
+    min-height: 48px;
+    padding: 10px 12px;
+    border-radius: 9px;
+    border: 1px solid var(--border);
+    background: var(--card);
+    color: var(--text);
+    font-size: 16px;
+  }
+  button {
+    min-height: 44px;
+    border: 1px solid var(--border);
+    border-radius: 9px;
+    background: var(--card);
+    color: var(--text);
+    cursor: pointer;
+    touch-action: manipulation;
+  }
+  button:focus-visible, input:focus-visible, select:focus-visible {
+    outline: 3px solid color-mix(in srgb, var(--accent) 45%, transparent);
+    outline-offset: 2px;
+  }
+  .picker-field {
+    text-align: left;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .picker-field::after { content: "▾"; color: var(--muted); }
+  .status {
+    min-height: 1.4em;
+    margin-top: 8px;
+    font-size: .88rem;
+    color: var(--muted);
+  }
+  .status.good { color: var(--success); }
+  .status.warn { color: var(--warning); }
+  .status.bad { color: var(--error); }
+
+  .calendar {
+    margin-top: 10px;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 10px;
+  }
+  .calendar[hidden] { display: none; }
+  .cal-head {
+    display: grid;
+    grid-template-columns: 44px 1fr 44px;
+    gap: 6px;
+    align-items: center;
+    margin-bottom: 8px;
+  }
+  .cal-title { text-align: center; font-weight: 750; }
+  .cal-nav { font-size: 1.25rem; padding: 0; }
+  .weekdays, .days {
+    display: grid;
+    grid-template-columns: repeat(7, minmax(0, 1fr));
+    gap: 4px;
+  }
+  .weekday {
+    text-align: center;
+    color: var(--muted);
+    font-size: .75rem;
+    padding: 4px 0;
+  }
+  .day {
+    min-height: 40px;
+    padding: 0;
+    border-radius: 8px;
+  }
+  .day.blank {
+    visibility: hidden;
+  }
+  .day.weekend {
+    background: var(--disabled);
+    color: var(--disabled-text);
+    cursor: not-allowed;
+  }
+  .day.selected {
+    border-color: var(--accent);
+    background: var(--accent-soft);
+    font-weight: 800;
+  }
+  .day.today:not(.weekend) {
+    box-shadow: inset 0 0 0 1px var(--accent);
+  }
+
+  .segmented-time {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 8px;
+  }
+  .segmented-time label { margin-top: 0; }
+  @media (max-width: 360px) {
+    .segmented-time { grid-template-columns: 1fr; }
+  }
+
+  .stepper {
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: 7px;
+    align-items: stretch;
+  }
+  .stepper button {
+    padding: 6px 3px;
+    font-weight: 700;
+  }
+  .stepper-display {
+    grid-column: span 1;
+    display: grid;
+    place-items: center;
+    min-height: 54px;
+    padding: 4px;
+    border: 1px solid var(--border);
+    border-radius: 9px;
+    font-weight: 800;
+    text-align: center;
+  }
+  @media (max-width: 430px) {
+    .stepper {
+      grid-template-columns: repeat(4, 1fr);
+    }
+    .stepper-display {
+      grid-column: 1 / -1;
+      grid-row: 1;
+    }
+  }
+
+  .note {
+    margin-top: 24px;
+    border-left: 4px solid var(--accent);
+    padding: 9px 12px;
+    background: var(--accent-soft);
+    border-radius: 6px;
+    font-size: .9rem;
+  }
+  .results {
+    margin-top: 28px;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 15px;
+  }
+  .results code {
+    display: block;
+    overflow-wrap: anywhere;
+    font-size: .84rem;
+    color: var(--muted);
+  }
+</style>
+</head>
+<body>
+<main>
+  <h1>Date &amp; Time Picker Comparison</h1>
+  <p class="intro">
+    Eight independent test controls: four weekday-only date strategies and four 5-minute time strategies.
+    Try them on Android, desktop, and iPhone to compare native versus custom behavior.
+  </p>
+
+  <h2>Date selectors — Saturday and Sunday not allowed</h2>
+  <div class="grid">
+    <section class="card">
+      <h3>1. Native date + reject weekend</h3>
+      <p class="explain">Uses the phone/browser's normal date picker. A weekend can appear in the picker, but the page refuses it after selection.</p>
+      <label for="dateReject">Choose a weekday</label>
+      <input id="dateReject" type="date">
+      <div id="dateRejectStatus" class="status" aria-live="polite">No date selected.</div>
+    </section>
+
+    <section class="card">
+      <h3>2. Native date + move weekend forward</h3>
+      <p class="explain">Keeps the native picker, but Saturday or Sunday is automatically moved to the following Monday with an explicit message.</p>
+      <label for="dateSnap">Choose a weekday</label>
+      <input id="dateSnap" type="date">
+      <div id="dateSnapStatus" class="status" aria-live="polite">No date selected.</div>
+    </section>
+
+    <section class="card">
+      <h3>3. Custom calendar <span class="badge">Strong candidate</span></h3>
+      <p class="explain">Weekends are visibly disabled before the user taps. This avoids the select-then-error problem, but replaces the native picker.</p>
+      <label id="customDateLabel">Choose a weekday</label>
+      <button id="customDateButton" type="button" class="picker-field" aria-labelledby="customDateLabel customDateButton" aria-expanded="false">
+        <span id="customDateText">Select a date</span>
+      </button>
+      <div id="calendar" class="calendar" hidden>
+        <div class="cal-head">
+          <button id="prevMonth" type="button" class="cal-nav" aria-label="Previous month">‹</button>
+          <div id="calendarTitle" class="cal-title" aria-live="polite"></div>
+          <button id="nextMonth" type="button" class="cal-nav" aria-label="Next month">›</button>
+        </div>
+        <div class="weekdays" aria-hidden="true">
+          <div class="weekday">Sun</div><div class="weekday">Mon</div><div class="weekday">Tue</div>
+          <div class="weekday">Wed</div><div class="weekday">Thu</div><div class="weekday">Fri</div><div class="weekday">Sat</div>
+        </div>
+        <div id="calendarDays" class="days"></div>
+      </div>
+      <div id="customDateStatus" class="status" aria-live="polite">No date selected.</div>
+    </section>
+
+    <section class="card">
+      <h3>4. Weekday-only list</h3>
+      <p class="explain">A standard native dropdown containing only valid weekdays for roughly the next six months. Impossible to choose a weekend, but less convenient for distant dates.</p>
+      <label for="weekdayList">Choose a weekday</label>
+      <select id="weekdayList">
+        <option value="">Select a date</option>
+      </select>
+      <div id="weekdayListStatus" class="status" aria-live="polite">No date selected.</div>
+    </section>
+  </div>
+
+  <h2>Time selectors — 5-minute intervals only</h2>
+  <div class="grid">
+    <section class="card">
+      <h3>1. Native time + HTML step</h3>
+      <p class="explain">The standards-based baseline. <code>step="300"</code> makes off-step values invalid, but some native pickers still display every minute.</p>
+      <label for="timeStep">Choose a time</label>
+      <input id="timeStep" type="time" step="300">
+      <div id="timeStepStatus" class="status" aria-live="polite">No time selected.</div>
+    </section>
+
+    <section class="card">
+      <h3>2. Native time + automatic rounding</h3>
+      <p class="explain">The native picker may show every minute, but the page immediately rounds the result to the nearest 5 minutes and tells the user what changed.</p>
+      <label for="timeSnap">Choose a time</label>
+      <input id="timeSnap" type="time">
+      <div id="timeSnapStatus" class="status" aria-live="polite">No time selected.</div>
+    </section>
+
+    <section class="card">
+      <h3>3. Hour + 5-minute + AM/PM <span class="badge">Strong candidate</span></h3>
+      <p class="explain">Uses ordinary native dropdowns. The minute control literally contains only 00, 05, 10, …, 55, so an invalid minute cannot be selected.</p>
+      <div class="segmented-time">
+        <div>
+          <label for="hourSelect">Hour</label>
+          <select id="hourSelect"></select>
+        </div>
+        <div>
+          <label for="minuteSelect">Minute</label>
+          <select id="minuteSelect"></select>
+        </div>
+        <div>
+          <label for="ampmSelect">AM/PM</label>
+          <select id="ampmSelect">
+            <option>AM</option>
+            <option selected>PM</option>
+          </select>
+        </div>
+      </div>
+      <div id="segmentedStatus" class="status good" aria-live="polite"></div>
+    </section>
+
+    <section class="card">
+      <h3>4. Tap stepper</h3>
+      <p class="explain">No typing and no minute wheel. Large buttons move by 5 minutes or 1 hour, and every possible state is valid.</p>
+      <label>Choose a time</label>
+      <div class="stepper" aria-label="5-minute time stepper">
+        <button type="button" data-delta="-60">−1 hr</button>
+        <button type="button" data-delta="-5">−5</button>
+        <div id="stepperDisplay" class="stepper-display" aria-live="polite"></div>
+        <button type="button" data-delta="5">+5</button>
+        <button type="button" data-delta="60">+1 hr</button>
+      </div>
+      <div id="stepperStatus" class="status good">Always constrained to a 5-minute interval.</div>
+    </section>
+  </div>
+
+  <div class="note">
+    <strong>Testing suggestion:</strong> pay attention not only to whether an invalid value is ultimately rejected, but whether the interface prevents you from seeing or choosing the invalid value in the first place. Methods 3 and 4 in each group intentionally remove invalid choices before selection.
+  </div>
+
+  <section class="results">
+    <h2 style="margin-top:0">Current test values</h2>
+    <code id="resultsText">Interact with any control to see its current value here.</code>
+  </section>
+</main>
+
+<script>
+(() => {
+  "use strict";
+
+  const state = {
+    dateReject: "",
+    dateSnap: "",
+    customDate: "",
+    weekdayList: "",
+    timeStep: "",
+    timeSnap: "",
+    segmentedTime: "",
+    stepperTime: ""
+  };
+
+  const pad2 = n => String(n).padStart(2, "0");
+
+  function parseDateValue(value) {
+    const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(value);
+    if (!m) return null;
+    return new Date(Number(m[1]), Number(m[2]) - 1, Number(m[3]), 12, 0, 0, 0);
+  }
+
+  function toDateValue(date) {
+    return `${date.getFullYear()}-${pad2(date.getMonth() + 1)}-${pad2(date.getDate())}`;
+  }
+
+  function isWeekend(date) {
+    const day = date.getDay();
+    return day === 0 || day === 6;
+  }
+
+  function prettyDate(date) {
+    return new Intl.DateTimeFormat(undefined, {
+      weekday: "short", year: "numeric", month: "short", day: "numeric"
+    }).format(date);
+  }
+
+  function parseTimeValue(value) {
+    const m = /^(\d{2}):(\d{2})$/.exec(value);
+    if (!m) return null;
+    const h = Number(m[1]), min = Number(m[2]);
+    if (h > 23 || min > 59) return null;
+    return h * 60 + min;
+  }
+
+  function toTimeValue(totalMinutes) {
+    const normalized = ((totalMinutes % 1440) + 1440) % 1440;
+    return `${pad2(Math.floor(normalized / 60))}:${pad2(normalized % 60)}`;
+  }
+
+  function prettyTime(value) {
+    const total = parseTimeValue(value);
+    if (total === null) return "";
+    let hour = Math.floor(total / 60);
+    const minute = total % 60;
+    const suffix = hour >= 12 ? "PM" : "AM";
+    hour = hour % 12 || 12;
+    return `${hour}:${pad2(minute)} ${suffix}`;
+  }
+
+  function updateResults() {
+    const lines = [
+      `Date — native reject: ${state.dateReject || "—"}`,
+      `Date — native move forward: ${state.dateSnap || "—"}`,
+      `Date — custom calendar: ${state.customDate || "—"}`,
+      `Date — weekday list: ${state.weekdayList || "—"}`,
+      `Time — native step: ${state.timeStep || "—"}`,
+      `Time — native rounding: ${state.timeSnap || "—"}`,
+      `Time — segmented: ${state.segmentedTime || "—"}`,
+      `Time — stepper: ${state.stepperTime || "—"}`
+    ];
+    document.getElementById("resultsText").textContent = lines.join("\n");
+  }
+
+  // DATE 1 — native reject
+  const dateReject = document.getElementById("dateReject");
+  const dateRejectStatus = document.getElementById("dateRejectStatus");
+  dateReject.addEventListener("change", () => {
+    const d = parseDateValue(dateReject.value);
+    if (!d) {
+      state.dateReject = "";
+      dateRejectStatus.textContent = "No date selected.";
+      dateRejectStatus.className = "status";
+    } else if (isWeekend(d)) {
+      const attempted = prettyDate(d);
+      dateReject.value = "";
+      state.dateReject = "";
+      dateRejectStatus.textContent = `${attempted} is a weekend. Please choose Monday through Friday.`;
+      dateRejectStatus.className = "status bad";
+    } else {
+      state.dateReject = dateReject.value;
+      dateRejectStatus.textContent = `Accepted: ${prettyDate(d)}.`;
+      dateRejectStatus.className = "status good";
+    }
+    updateResults();
+  });
+
+  // DATE 2 — native snap forward
+  const dateSnap = document.getElementById("dateSnap");
+  const dateSnapStatus = document.getElementById("dateSnapStatus");
+  dateSnap.addEventListener("change", () => {
+    let d = parseDateValue(dateSnap.value);
+    if (!d) {
+      state.dateSnap = "";
+      dateSnapStatus.textContent = "No date selected.";
+      dateSnapStatus.className = "status";
+      updateResults();
+      return;
+    }
+    if (isWeekend(d)) {
+      const original = prettyDate(d);
+      const addDays = d.getDay() === 6 ? 2 : 1;
+      d.setDate(d.getDate() + addDays);
+      dateSnap.value = toDateValue(d);
+      state.dateSnap = dateSnap.value;
+      dateSnapStatus.textContent = `${original} is a weekend, so it was moved to ${prettyDate(d)}.`;
+      dateSnapStatus.className = "status warn";
+    } else {
+      state.dateSnap = dateSnap.value;
+      dateSnapStatus.textContent = `Accepted: ${prettyDate(d)}.`;
+      dateSnapStatus.className = "status good";
+    }
+    updateResults();
+  });
+
+  // DATE 3 — custom calendar
+  const customDateButton = document.getElementById("customDateButton");
+  const customDateText = document.getElementById("customDateText");
+  const customDateStatus = document.getElementById("customDateStatus");
+  const calendar = document.getElementById("calendar");
+  const calendarTitle = document.getElementById("calendarTitle");
+  const calendarDays = document.getElementById("calendarDays");
+  const now = new Date();
+  let viewYear = now.getFullYear();
+  let viewMonth = now.getMonth();
+  let selectedCustom = null;
+
+  function renderCalendar() {
+    calendarDays.replaceChildren();
+    const first = new Date(viewYear, viewMonth, 1, 12);
+    const count = new Date(viewYear, viewMonth + 1, 0, 12).getDate();
+    calendarTitle.textContent = new Intl.DateTimeFormat(undefined, {
+      month: "long", year: "numeric"
+    }).format(first);
+
+    for (let i = 0; i < first.getDay(); i++) {
+      const blank = document.createElement("button");
+      blank.type = "button";
+      blank.className = "day blank";
+      blank.tabIndex = -1;
+      blank.setAttribute("aria-hidden", "true");
+      calendarDays.appendChild(blank);
+    }
+
+    for (let day = 1; day <= count; day++) {
+      const d = new Date(viewYear, viewMonth, day, 12);
+      const button = document.createElement("button");
+      button.type = "button";
+      button.className = "day";
+      button.textContent = String(day);
+      button.setAttribute("aria-label", prettyDate(d));
+
+      if (isWeekend(d)) {
+        button.classList.add("weekend");
+        button.disabled = true;
+        button.setAttribute("aria-label", `${prettyDate(d)}, unavailable weekend`);
+      } else {
+        button.addEventListener("click", () => {
+          selectedCustom = new Date(viewYear, viewMonth, day, 12);
+          const value = toDateValue(selectedCustom);
+          state.customDate = value;
+          customDateText.textContent = prettyDate(selectedCustom);
+          customDateStatus.textContent = `Accepted: ${prettyDate(selectedCustom)}.`;
+          customDateStatus.className = "status good";
+          calendar.hidden = true;
+          customDateButton.setAttribute("aria-expanded", "false");
+          renderCalendar();
+          updateResults();
+          customDateButton.focus();
+        });
+      }
+
+      if (
+        d.getFullYear() === now.getFullYear() &&
+        d.getMonth() === now.getMonth() &&
+        d.getDate() === now.getDate()
+      ) button.classList.add("today");
+
+      if (
+        selectedCustom &&
+        d.getFullYear() === selectedCustom.getFullYear() &&
+        d.getMonth() === selectedCustom.getMonth() &&
+        d.getDate() === selectedCustom.getDate()
+      ) {
+        button.classList.add("selected");
+        button.setAttribute("aria-pressed", "true");
+      }
+      calendarDays.appendChild(button);
+    }
+  }
+
+  customDateButton.addEventListener("click", () => {
+    calendar.hidden = !calendar.hidden;
+    customDateButton.setAttribute("aria-expanded", String(!calendar.hidden));
+  });
+  document.getElementById("prevMonth").addEventListener("click", () => {
+    viewMonth--;
+    if (viewMonth < 0) { viewMonth = 11; viewYear--; }
+    renderCalendar();
+  });
+  document.getElementById("nextMonth").addEventListener("click", () => {
+    viewMonth++;
+    if (viewMonth > 11) { viewMonth = 0; viewYear++; }
+    renderCalendar();
+  });
+  renderCalendar();
+
+  // DATE 4 — weekday list, next ~6 months
+  const weekdayList = document.getElementById("weekdayList");
+  const weekdayListStatus = document.getElementById("weekdayListStatus");
+  const start = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 12);
+  for (let offset = 0; offset <= 183; offset++) {
+    const d = new Date(start);
+    d.setDate(start.getDate() + offset);
+    if (isWeekend(d)) continue;
+    const opt = document.createElement("option");
+    opt.value = toDateValue(d);
+    opt.textContent = prettyDate(d);
+    weekdayList.appendChild(opt);
+  }
+  weekdayList.addEventListener("change", () => {
+    const d = parseDateValue(weekdayList.value);
+    state.weekdayList = weekdayList.value;
+    if (d) {
+      weekdayListStatus.textContent = `Accepted: ${prettyDate(d)}.`;
+      weekdayListStatus.className = "status good";
+    } else {
+      weekdayListStatus.textContent = "No date selected.";
+      weekdayListStatus.className = "status";
+    }
+    updateResults();
+  });
+
+  // TIME 1 — native step
+  const timeStep = document.getElementById("timeStep");
+  const timeStepStatus = document.getElementById("timeStepStatus");
+  timeStep.addEventListener("change", () => {
+    const total = parseTimeValue(timeStep.value);
+    if (total === null) {
+      state.timeStep = "";
+      timeStepStatus.textContent = "No time selected.";
+      timeStepStatus.className = "status";
+    } else if (total % 5 !== 0) {
+      state.timeStep = timeStep.value;
+      timeStepStatus.textContent = `${prettyTime(timeStep.value)} is not on a 5-minute interval. The native picker allowed an invalid step.`;
+      timeStepStatus.className = "status bad";
+    } else {
+      state.timeStep = timeStep.value;
+      timeStepStatus.textContent = `Accepted: ${prettyTime(timeStep.value)}.`;
+      timeStepStatus.className = "status good";
+    }
+    updateResults();
+  });
+
+  // TIME 2 — native snap nearest 5
+  const timeSnap = document.getElementById("timeSnap");
+  const timeSnapStatus = document.getElementById("timeSnapStatus");
+  timeSnap.addEventListener("change", () => {
+    const total = parseTimeValue(timeSnap.value);
+    if (total === null) {
+      state.timeSnap = "";
+      timeSnapStatus.textContent = "No time selected.";
+      timeSnapStatus.className = "status";
+      updateResults();
+      return;
+    }
+    const rounded = Math.round(total / 5) * 5;
+    const snapped = toTimeValue(rounded);
+    const original = timeSnap.value;
+    timeSnap.value = snapped;
+    state.timeSnap = snapped;
+    if (original === snapped) {
+      timeSnapStatus.textContent = `Accepted: ${prettyTime(snapped)}.`;
+      timeSnapStatus.className = "status good";
+    } else {
+      timeSnapStatus.textContent = `${prettyTime(original)} was adjusted to ${prettyTime(snapped)}.`;
+      timeSnapStatus.className = "status warn";
+    }
+    updateResults();
+  });
+
+  // TIME 3 — segmented select
+  const hourSelect = document.getElementById("hourSelect");
+  const minuteSelect = document.getElementById("minuteSelect");
+  const ampmSelect = document.getElementById("ampmSelect");
+  const segmentedStatus = document.getElementById("segmentedStatus");
+
+  for (let h = 1; h <= 12; h++) {
+    const opt = document.createElement("option");
+    opt.value = String(h);
+    opt.textContent = String(h);
+    if (h === 12) opt.selected = true;
+    hourSelect.appendChild(opt);
+  }
+  for (let m = 0; m < 60; m += 5) {
+    const opt = document.createElement("option");
+    opt.value = String(m);
+    opt.textContent = pad2(m);
+    minuteSelect.appendChild(opt);
+  }
+
+  function updateSegmented() {
+    const h12 = Number(hourSelect.value);
+    const min = Number(minuteSelect.value);
+    const pm = ampmSelect.value === "PM";
+    let h24 = h12 % 12;
+    if (pm) h24 += 12;
+    const value = `${pad2(h24)}:${pad2(min)}`;
+    state.segmentedTime = value;
+    segmentedStatus.textContent = `Selected: ${prettyTime(value)}.`;
+    updateResults();
+  }
+  hourSelect.addEventListener("change", updateSegmented);
+  minuteSelect.addEventListener("change", updateSegmented);
+  ampmSelect.addEventListener("change", updateSegmented);
+  updateSegmented();
+
+  // TIME 4 — stepper
+  let stepperMinutes = 12 * 60;
+  const stepperDisplay = document.getElementById("stepperDisplay");
+  function renderStepper() {
+    const value = toTimeValue(stepperMinutes);
+    state.stepperTime = value;
+    stepperDisplay.textContent = prettyTime(value);
+    updateResults();
+  }
+  document.querySelectorAll(".stepper button[data-delta]").forEach(button => {
+    button.addEventListener("click", () => {
+      stepperMinutes += Number(button.dataset.delta);
+      stepperMinutes = ((stepperMinutes % 1440) + 1440) % 1440;
+      renderStepper();
+    });
+  });
+  renderStepper();
+})();
+</script>
+</body>
+</html>
