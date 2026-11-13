@@ -1,0 +1,50 @@
+{
+  "schema_version": 1,
+  "site": {
+    "title": "Carl Saltzberg",
+    "subtitle": "Web tools, apps, guides, and projects",
+    "repository": "csaltzberg/GPT-Tools",
+    "branch": "main",
+    "base_path": "/GPT-Tools/",
+    "timezone": "America/New_York"
+  },
+  "discovery": {
+    "extensions": [".html", ".htm", ".pdf"],
+    "ignore_folders": ["assets", "scripts", "tests", "docs", "Archives", "node_modules"],
+    "ignore_paths": ["index.html", "404.html", "hub_manifest.json"],
+    "hidden_paths": ["TSC_OTS_Generator_v2_1_6.html", "**/TSC_OTS_Generator_v2_1_6.html"],
+    "root_category": "Uncategorized",
+    "folder_index_is_project": true
+  },
+  "category_order": ["Apps", "Web-Tools", "TSC-Work", "GPT-Tools", "Articles", "Duck-Game", "Experiments", "Lego", "Guides"],
+  "categories": {
+    "Apps": {"label": "Apps", "icon": "📱", "open": true},
+    "Web-Tools": {"label": "Web Tools", "icon": "🧰", "open": true},
+    "TSC-Work": {"label": "TSC Work", "icon": "🏫", "open": true},
+    "GPT-Tools": {"label": "GPT Tools", "icon": "🤖", "open": true},
+    "Articles": {"label": "Articles", "icon": "📄"},
+    "Duck-Game": {"label": "Duck Game", "icon": "🦆"},
+    "Experiments": {"label": "Experiments", "icon": "🧪"},
+    "Lego": {"label": "LEGO", "icon": "🧱"},
+    "Guides": {"label": "Guides", "icon": "📖"},
+    "Uncategorized": {"label": "Uncategorized", "icon": "📦"}
+  },
+  "folders": {},
+  "items": {
+    "Apps/Seek/QR-seek-app-redirect": {"label": "Seek", "icon": "🔎"},
+    "Web-Tools/County-Map-Maker/road_trip_atlas": {"label": "County Map Maker", "icon": "🗺️"},
+    "TSC-Work/OTS-Generator/TSC_OTS_Generator": {"label": "TSC OTS Generator", "icon": "📅", "order": 10},
+    "TSC-Work/Logo-Generator/TSC_Logo_Generator": {"label": "TSC Logo Generator", "icon": "🎨", "order": 20},
+    "GPT-Tools/Canvas-Banner/canvas_banner": {"label": "Canvas Banner", "icon": "🖼️"},
+    "Articles/Spandrels-1979/Spandrels1979": {"label": "Spandrels 1979", "icon": "📚"},
+    "Duck-Game/ducks": {"label": "Ducks", "icon": "🦆"},
+    "Duck-Game/ducks_2": {"label": "Ducks 2", "icon": "🐤"},
+    "Experiments/confetti": {"label": "Confetti", "icon": "🎊"},
+    "Experiments/date_time_picker_comparison": {"label": "Date & Time Picker Comparison", "icon": "🗓️"},
+    "Experiments/image_compare_slider": {"label": "Image Comparison Slider", "icon": "↔️"},
+    "Experiments/Campus-Map": {"label": "Campus Map Demo", "icon": "🗺️", "description": "Existing demonstration extracted from the original source package."},
+    "Lego/SkywalkerSaga/lego_star_wars_skywalker_saga_codes": {"label": "LEGO Star Wars: The Skywalker Saga Codes", "icon": "🧱"},
+    "Guides/Switch-Pro-Controller/switch_1_pro_controller_shell_swap": {"label": "Switch Pro Controller Shell Swap", "icon": "🎮"}
+  },
+  "custom_items": []
+}
