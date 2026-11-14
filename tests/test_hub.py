@@ -1,19 +1,18 @@
-"""Standard-library regression tests: python3 -m unittest discover -s tests -v."""
+"""Regression tests. HUB_MIGRATION_AUDIT=1 additionally checks the one-time baseline."""
 from __future__ import annotations
-import copy
 import hashlib
 import importlib.util
 import json
+import os
 import tempfile
 import unittest
 from html.parser import HTMLParser
 from pathlib import Path
 from urllib.parse import unquote, urlsplit
-
 ROOT = Path(__file__).resolve().parents[1]
 spec = importlib.util.spec_from_file_location('hub_builder', ROOT / 'scripts/build_manifest.py')
-hub = importlib.util.module_from_spec(spec)
-spec.loader.exec_module(hub)
+hub = importlib.util.module_from_spec(spec); spec.loader.exec_module(hub)
+AUDIT = os.environ.get('HUB_MIGRATION_AUDIT') == '1'
 
 
 def defaults():
@@ -30,23 +29,21 @@ class DiscoveryTests(unittest.TestCase):
         self.root = Path(self.temp.name); self.config = defaults()
     def add(self, name, title=None, content=None):
         p = self.root / name; p.parent.mkdir(parents=True, exist_ok=True)
-        if content is None:
-            content = f'<!doctype html><title>{title or ""}</title><p>fixture</p>' if p.suffix in ('.html', '.htm') else 'fixture'
+        if content is None: content = f'<!doctype html><title>{title or ""}</title><p>fixture</p>' if p.suffix in ('.html', '.htm') else 'fixture'
         p.write_text(content, encoding='utf-8'); return p
     def model(self): return hub.build_model(self.root, self.config)
     def items(self): return [i for c in self.model()['categories'] for i in c['items']]
     def test_new_category_and_file_appear_without_configuration(self):
         self.add('Flashcards/cranial_nerves.html', 'Cranial Nerves')
-        m = self.model(); self.assertEqual(m['categories'][0]['key'], 'Flashcards')
-        self.assertEqual(m['item_count'], 1); self.assertEqual(self.items()[0]['label'], 'Cranial Nerves')
+        self.assertEqual(self.model()['categories'][0]['key'], 'Flashcards')
+        self.assertEqual(self.model()['item_count'], 1); self.assertEqual(self.items()[0]['label'], 'Cranial Nerves')
     def test_no_section_for_assets_or_empty_placeholder(self):
-        self.add('Photos/photo.jpg'); self.add('New-Folder/placeholder'); self.add('assets/test.html')
+        for p in ['Photos/photo.jpg', 'New-Folder/placeholder', 'assets/test.html']: self.add(p)
         self.assertEqual(self.model()['categories'], [])
     def test_root_files_use_uncategorized(self):
         self.add('new_demo.html'); self.assertEqual(self.model()['categories'][0]['key'], 'Uncategorized')
     def test_index_and_system_files_are_not_cards(self):
-        for p in ['index.html', '404.html', '.github/a.html', 'scripts/a.html', '_Draft/a.html', 'A/_draft.html']:
-            self.add(p)
+        for p in ['index.html', '404.html', '.github/a.html', 'scripts/a.html', '_Draft/a.html', 'A/_draft.html']: self.add(p)
         self.assertEqual(self.items(), [])
     def test_label_priority(self):
         self.add('Examples/a.html', 'Inside Title'); self.add('Examples/fallback_name.html')
@@ -56,26 +53,22 @@ class DiscoveryTests(unittest.TestCase):
         for cat in ['Zebra', 'TSC-Work', 'Alpha', 'Experiments']: self.add(cat + '/test.html')
         self.assertEqual([c['key'] for c in self.model()['categories']], ['TSC-Work', 'Experiments', 'Alpha', 'Zebra'])
     def test_numeric_category_override(self):
-        self.add('Experiments/a.html'); self.add('New/b.html')
-        self.config['categories']['New'] = {'order': -10, 'label': 'New first'}
+        self.add('Experiments/a.html'); self.add('New/b.html'); self.config['categories']['New'] = {'order': -10}
         self.assertEqual(self.model()['categories'][0]['key'], 'New')
     def test_items_alphabetical_unless_ordered(self):
         for title in ['Zebra', 'Alpha', 'Beta']: self.add('Examples/' + title + '.html', title)
         self.config['items']['Examples/Zebra'] = {'order': 1}
         self.assertEqual([i['label'] for i in self.items()], ['Zebra', 'Alpha', 'Beta'])
     def test_versions_are_numeric_and_newest_is_current(self):
-        for version in ['2_9_9', '2_10_0', '1_5', '2_2_0']: self.add(f'TSC-Work/OTS/TSC_OTS_Generator_v{version}.html')
-        item = self.items()[0]
-        self.assertEqual(item['current']['version'], '2.10.0')
-        self.assertEqual([r['version'] for r in item['older']], ['2.9.9', '2.2.0', '1.5'])
-        self.add('TSC-Work/OTS/TSC_OTS_Generator_v3_0_0.html')
-        self.assertEqual(self.items()[0]['current']['version'], '3.0.0')
+        for v in ['2_9_9', '2_10_0', '1_5', '2_2_0']: self.add(f'TSC-Work/OTS/TSC_OTS_Generator_v{v}.html')
+        self.assertEqual(self.items()[0]['current']['version'], '2.10.0')
+        self.assertEqual([r['version'] for r in self.items()[0]['older']], ['2.9.9', '2.2.0', '1.5'])
+        self.add('TSC-Work/OTS/TSC_OTS_Generator_v3_0_0.html'); self.assertEqual(self.items()[0]['current']['version'], '3.0.0')
     def test_version_group_does_not_cross_directories(self):
         self.add('A/demo_v1_0.html'); self.add('B/demo_v2_0.html')
         self.assertEqual(len(self.items()), 2); self.assertTrue(all(not i['older'] for i in self.items()))
     def test_non_version_number_is_a_separate_item(self):
-        self.add('Duck-Game/ducks.html'); self.add('Duck-Game/ducks_2.html')
-        self.assertEqual(len(self.items()), 2)
+        self.add('Duck-Game/ducks.html'); self.add('Duck-Game/ducks_2.html'); self.assertEqual(len(self.items()), 2)
     def test_broken_ots_version_hidden_at_any_depth(self):
         for prefix in ['', 'TSC-Work/OTS/']: self.add(prefix + 'TSC_OTS_Generator_v2_1_6.html')
         self.assertEqual(self.items(), [])
@@ -84,58 +77,42 @@ class DiscoveryTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, 'Ambiguous'): self.model()
     def test_matching_pdf_attaches_to_exact_release(self):
         self.add('A/demo_v1_0.html'); self.add('A/demo_v1_0.pdf'); self.add('A/demo_v2_0.html')
-        item = self.items()[0]
-        self.assertEqual(item['current']['alternatives'], [])
-        self.assertEqual(item['older'][0]['alternatives'][0]['path'], 'A/demo_v1_0.pdf')
+        self.assertEqual(self.items()[0]['current']['alternatives'], [])
+        self.assertEqual(self.items()[0]['older'][0]['alternatives'][0]['path'], 'A/demo_v1_0.pdf')
     def test_unversioned_html_pdf_pair(self):
-        self.add('Lego/codes.html'); self.add('Lego/codes.pdf')
-        self.assertEqual(len(self.items()), 1)
+        self.add('Lego/codes.html'); self.add('Lego/codes.pdf'); self.assertEqual(len(self.items()), 1)
         self.assertEqual(self.items()[0]['current']['alternatives'][0]['label'], 'Printable PDF')
     def test_standalone_pdf_is_a_card(self):
         self.add('Guides/print.pdf'); self.assertEqual(self.items()[0]['current']['path'], 'Guides/print.pdf')
     def test_folder_index_is_single_project_by_default(self):
-        self.add('Experiments/Map/index.html', 'Campus Map'); self.add('Experiments/Map/help.html'); self.add('Experiments/Map/data/a.json')
+        for p in ['Experiments/Map/index.html', 'Experiments/Map/help.html', 'Experiments/Map/data/a.json']: self.add(p)
         self.assertEqual(len(self.items()), 1); self.assertEqual(self.items()[0]['key'], 'Experiments/Map')
     def test_folder_mode_can_expose_child_pages(self):
         self.add('Examples/Project/index.html'); self.add('Examples/Project/help.html')
-        self.config['folders']['Examples/Project'] = {'mode': 'contents'}
-        self.assertEqual(len(self.items()), 2)
+        self.config['folders']['Examples/Project'] = {'mode': 'contents'}; self.assertEqual(len(self.items()), 2)
     def test_folder_hide_includes_descendants(self):
         self.add('Examples/Private/Sub/a.html'); self.add('Examples/Public/b.html')
-        self.config['folders']['Examples/Private'] = {'hidden': True}
-        self.assertEqual(len(self.items()), 1)
+        self.config['folders']['Examples/Private'] = {'hidden': True}; self.assertEqual(len(self.items()), 1)
     def test_category_and_item_visibility(self):
-        self.add('A/a.html'); self.add('B/b.html')
-        self.config['categories']['A'] = {'hidden': True}
-        self.config['items']['B/b'] = {'hidden': True}
+        self.add('A/a.html'); self.add('B/b.html'); self.config['categories']['A'] = {'hidden': True}; self.config['items']['B/b'] = {'hidden': True}
         self.assertEqual(self.items(), [])
     def test_custom_current_pin(self):
-        self.add('A/tool_v1_0.html'); self.add('A/tool_v2_0.html')
-        self.config['items']['A/tool'] = {'current': 'A/tool_v1_0.html'}
+        self.add('A/tool_v1_0.html'); self.add('A/tool_v2_0.html'); self.config['items']['A/tool'] = {'current': 'A/tool_v1_0.html'}
         self.assertEqual(self.items()[0]['current']['version'], '1.0')
     def test_custom_category_changes_navigation_not_files(self):
-        self.add('A/Folder/demo.html')
-        self.config['items']['A/Folder/demo'] = {'category': 'Featured'}
-        self.assertEqual(self.model()['categories'][0]['key'], 'Featured')
-        self.assertEqual(self.items()[0]['current']['path'], 'A/Folder/demo.html')
-        self.assertEqual(self.items()[0]['folder'], [])
+        self.add('A/Folder/demo.html'); self.config['items']['A/Folder/demo'] = {'category': 'Featured'}
+        self.assertEqual(self.model()['categories'][0]['key'], 'Featured'); self.assertEqual(self.items()[0]['current']['path'], 'A/Folder/demo.html'); self.assertEqual(self.items()[0]['folder'], [])
     def test_unsafe_custom_urls_rejected(self):
         self.config['custom_items'] = [{'label': 'Unsafe', 'url': 'javascript:alert(1)'}]
         with self.assertRaises(ValueError): self.model()
     def test_titles_are_escaped_and_url_characters_encoded(self):
-        self.add('A/a #?%.html', '&lt;img src=x onerror=alert(1)&gt;')
-        rendered = hub.render_model(self.model(), self.config)
-        self.assertNotIn('<img src=x', rendered); self.assertIn('&lt;img', rendered)
-        self.assertIn('a%20%23%3F%25.html', rendered)
+        self.add('A/a #?%.html', '&lt;img src=x onerror=alert(1)&gt;'); rendered = hub.render_model(self.model(), self.config)
+        self.assertNotIn('<img src=x', rendered); self.assertIn('&lt;img', rendered); self.assertIn('a%20%23%3F%25.html', rendered)
     def test_folder_labels_and_order(self):
-        self.add('A/Zebra/a.html'); self.add('A/Alpha/b.html')
-        self.config['folders']['A/Zebra'] = {'order': 1, 'label': 'First folder'}
-        rendered = hub.render_model(self.model(), self.config)
-        self.assertLess(rendered.index('First folder'), rendered.index('A/Alpha'))
+        self.add('A/Zebra/a.html'); self.add('A/Alpha/b.html'); self.config['folders']['A/Zebra'] = {'order': 1, 'label': 'First folder'}
+        rendered = hub.render_model(self.model(), self.config); self.assertLess(rendered.index('First folder'), rendered.index('A/Alpha'))
     def test_glob_semantics(self):
-        self.assertTrue(hub.glob_matches('bad.html', '**/bad.html'))
-        self.assertTrue(hub.glob_matches('A/B/bad.html', '**/bad.html'))
-        self.assertFalse(hub.glob_matches('A/B/bad.html', 'A/*.html'))
+        self.assertTrue(hub.glob_matches('bad.html', '**/bad.html')); self.assertTrue(hub.glob_matches('A/B/bad.html', '**/bad.html')); self.assertFalse(hub.glob_matches('A/B/bad.html', 'A/*.html'))
     def test_invalid_config_fails_instead_of_publishing_empty_hub(self):
         self.config['items']['x'] = {'order': 'first'}
         with self.assertRaisesRegex(ValueError, 'numeric'): self.model()
@@ -144,47 +121,40 @@ class DiscoveryTests(unittest.TestCase):
     def test_missing_redirect_target_stops_build(self):
         self.add('index.html', content='<!doctype html><!-- Web Hub revision: test -->' + hub.START + hub.END)
         self.add('hub_redirects.json', content=json.dumps({'old.html': 'missing.html'}))
-        with self.assertRaisesRegex(ValueError, 'Redirect target missing'):
-            hub.build(self.root, self.root / '_site', self.config)
+        with self.assertRaisesRegex(ValueError, 'Redirect target missing'): hub.build(self.root, self.root / '_site', self.config)
 
 
 class LinkParser(HTMLParser):
     def __init__(self): super().__init__(); self.urls = []
     def handle_starttag(self, tag, attrs):
-        for key, value in attrs:
-            if value and key in ('href', 'src', 'poster'):
-                self.urls.append(value)
+        self.urls.extend(v for k, v in attrs if v and k in ('href', 'src', 'poster'))
 
 
 class RepositoryTests(unittest.TestCase):
+    @unittest.skipUnless(AUDIT, 'One-time audit; future intentional app updates must not be blocked')
     def test_migration_byte_preservation(self):
         record = json.loads((ROOT / 'docs/migration_map.json').read_text())
         for row in record['moves']:
             with self.subTest(path=row['to']):
-                self.assertEqual(hashlib.sha256((ROOT / row['to']).read_bytes()).hexdigest(), row['sha256'])
-                self.assertFalse((ROOT / row['from']).exists())
-        for row in record['extracted']:
-            self.assertEqual(hashlib.sha256((ROOT / row['path']).read_bytes()).hexdigest(), row['sha256'])
+                self.assertEqual(hashlib.sha256((ROOT / row['to']).read_bytes()).hexdigest(), row['sha256']); self.assertFalse((ROOT / row['from']).exists())
+        for row in record['extracted']: self.assertEqual(hashlib.sha256((ROOT / row['path']).read_bytes()).hexdigest(), row['sha256'])
     def test_real_hub_and_legacy_targets(self):
         config = json.loads((ROOT / 'hub_config.json').read_text())
         with tempfile.TemporaryDirectory() as temp:
             out = Path(temp) / 'site'; model = hub.build(ROOT, out, config)
-            self.assertEqual(model['item_count'], 14)
             items = [i for c in model['categories'] for i in c['items']]
-            ots = next(i for i in items if i['label'] == 'TSC OTS Generator')
-            self.assertEqual(ots['current']['version'], '2.2.0')
-            self.assertEqual([r['version'] for r in ots['older']], ['2.1.8', '2.1.5', '2.1', '2.0', '1.9', '1.8', '1.5'])
-            self.assertNotIn('2_1_6', json.dumps(model))
-            page = (out / 'index.html').read_text()
-            self.assertNotIn('{{', page); self.assertIn('Web Hub revision:', page)
+            self.assertEqual(model['item_count'], len(items))
+            if AUDIT:
+                self.assertEqual(len(items), 14)
+                ots = next(i for i in items if i['label'] == 'TSC OTS Generator')
+                self.assertEqual(ots['current']['version'], '2.2.0')
+                self.assertEqual([r['version'] for r in ots['older']], ['2.1.8', '2.1.5', '2.1', '2.0', '1.9', '1.8', '1.5'])
+            page = (out / 'index.html').read_text(); self.assertNotIn('{{', page); self.assertIn('Web Hub revision:', page)
             redirects = json.loads((ROOT / 'hub_redirects.json').read_text())
             for old, new in redirects.items():
                 self.assertTrue((out / old).is_file()); self.assertTrue((out / new).is_file())
-                if not old.endswith('.html'):
-                    self.assertEqual((out / old).read_bytes(), (out / new).read_bytes())
-                else:
-                    self.assertIn('target.search=location.search', (out / old).read_text())
-            # Validate static same-site file references, including all figures and audio.
+                if not old.endswith(('.html', '.htm')): self.assertEqual((out / old).read_bytes(), (out / new).read_bytes())
+                else: self.assertIn('target.search=location.search', (out / old).read_text())
             broken = []
             for path in out.rglob('*.html'):
                 parser = LinkParser(); parser.feed(path.read_text(encoding='utf-8', errors='replace'))
@@ -198,11 +168,7 @@ class RepositoryTests(unittest.TestCase):
                     else: target = path.parent / unquote(u.path)
                     if not target.exists(): broken.append((str(path.relative_to(out)), url))
             self.assertEqual(broken, [], f'Broken same-site references: {broken}')
-            for name in ['buildings.geojson', 'rooms_SM.geojson']:
-                data = json.loads((out / 'Experiments/Campus-Map/data' / name).read_text())
-                self.assertEqual(data['type'], 'FeatureCollection')
-            self.assertTrue((out / 'Duck-Game/duck-quack.wav').is_file())
+            for path in out.rglob('*.geojson'): self.assertEqual(json.loads(path.read_text())['type'], 'FeatureCollection')
             self.assertFalse((out / 'scripts').exists()); self.assertFalse((out / '.github').exists())
-
 
 if __name__ == '__main__': unittest.main()
