@@ -12,7 +12,8 @@ concurrency:
   cancel-in-progress: true
 jobs:
   build:
-    runs-on: ubuntu-latest
+    # Playwright 1.57 is tested on Ubuntu 24.04; do not track ubuntu-latest.
+    runs-on: ubuntu-24.04
     timeout-minutes: 15
     env:
       HUB_MIGRATION_AUDIT: ${{ (github.ref == 'refs/heads/reorganize-hub' || github.head_ref == 'reorganize-hub') && '1' || '0' }}
@@ -62,7 +63,7 @@ jobs:
   deploy:
     if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
     needs: build
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     permissions:
       pages: write
       id-token: write
