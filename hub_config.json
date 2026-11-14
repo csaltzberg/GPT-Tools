@@ -29,7 +29,10 @@
     "Guides": {"label": "Guides", "icon": "📖"},
     "Uncategorized": {"label": "Uncategorized", "icon": "📦"}
   },
-  "folders": {},
+  "folders": {
+    "TSC-Work/OTS-Generator": {"label": "OTS Generator", "order": 10},
+    "TSC-Work/Logo-Generator": {"label": "Logo Generator", "order": 20}
+  },
   "items": {
     "Apps/Seek/QR-seek-app-redirect": {"label": "Seek", "icon": "🔎"},
     "Web-Tools/County-Map-Maker/road_trip_atlas": {"label": "County Map Maker", "icon": "🗺️"},
