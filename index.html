@@ -1,479 +1,116 @@
 <!DOCTYPE html>
+<!-- Web Hub revision: timestamp is inserted by scripts/build_manifest.py on every build -->
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="color-scheme" content="light dark">
-  <title>Carl Saltzberg | Web Hub</title>
-  <style>
-    :root {
-      --bg: #f4f6f8;
-      --surface: #ffffff;
-      --surface-2: #eef2f6;
-      --text: #1f2933;
-      --muted: #667085;
-      --border: #d9e0e7;
-      --accent: #1769aa;
-      --accent-text: #ffffff;
-      --shadow: 0 2px 10px rgba(0,0,0,.07);
-    }
-    @media (prefers-color-scheme: dark) {
-      :root:not([data-theme="light"]) {
-        --bg: #101418;
-        --surface: #171c21;
-        --surface-2: #20272e;
-        --text: #edf2f7;
-        --muted: #aab4bf;
-        --border: #303943;
-        --accent: #67b7f7;
-        --accent-text: #08131c;
-        --shadow: 0 2px 10px rgba(0,0,0,.25);
-      }
-    }
-    :root[data-theme="dark"] {
-      --bg: #101418;
-      --surface: #171c21;
-      --surface-2: #20272e;
-      --text: #edf2f7;
-      --muted: #aab4bf;
-      --border: #303943;
-      --accent: #67b7f7;
-      --accent-text: #08131c;
-      --shadow: 0 2px 10px rgba(0,0,0,.25);
-    }
-    * { box-sizing: border-box; }
-    body {
-      margin: 0;
-      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-      background: var(--bg);
-      color: var(--text);
-    }
-    .page {
-      width: min(1100px, 100%);
-      margin: 0 auto;
-      padding: 18px;
-    }
-    header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 12px;
-      margin-bottom: 14px;
-    }
-    h1 { margin: 0; font-size: clamp(1.55rem, 5vw, 2.25rem); }
-    .subtitle { color: var(--muted); margin: 4px 0 0; }
-    button, input, a { font: inherit; }
-    .icon-button {
-      min-width: 44px;
-      min-height: 44px;
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      background: var(--surface);
-      color: var(--text);
-      cursor: pointer;
-    }
-    .toolbar {
-      display: grid;
-      grid-template-columns: 1fr;
-      gap: 10px;
-      margin-bottom: 18px;
-    }
-    .search {
-      width: 100%;
-      min-height: 48px;
-      border: 1px solid var(--border);
-      border-radius: 13px;
-      background: var(--surface);
-      color: var(--text);
-      padding: 0 14px;
-      outline: none;
-    }
-    .search:focus { border-color: var(--accent); }
-    .github-actions {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 8px;
-    }
-    .action {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      min-height: 46px;
-      padding: 8px 10px;
-      border-radius: 12px;
-      text-decoration: none;
-      text-align: center;
-      border: 1px solid var(--border);
-      background: var(--surface);
-      color: var(--text);
-    }
-    .action.primary {
-      background: var(--accent);
-      color: var(--accent-text);
-      border-color: var(--accent);
-    }
-    .section {
-      margin: 0 0 14px;
-      border: 1px solid var(--border);
-      border-radius: 16px;
-      background: var(--surface);
-      box-shadow: var(--shadow);
-      overflow: hidden;
-    }
-    .section summary {
-      cursor: pointer;
-      padding: 14px 16px;
-      font-weight: 650;
-      user-select: none;
-    }
-    .cards {
-      padding: 0 12px 12px;
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
-      gap: 9px;
-    }
-    .card {
-      display: flex;
-      align-items: center;
-      gap: 11px;
-      min-height: 58px;
-      padding: 11px 12px;
-      border: 1px solid var(--border);
-      border-radius: 13px;
-      background: var(--surface-2);
-      color: var(--text);
-      text-decoration: none;
-      transition: transform .12s ease, border-color .12s ease;
-    }
-    .card:hover { transform: translateY(-1px); border-color: var(--accent); }
-    .tool-group {
-      display: flex;
-      flex-direction: column;
-      min-width: 0;
-    }
-    .tool-group > .card {
-      border-radius: 13px 13px 8px 8px;
-    }
-    .versions {
-      margin: -1px 8px 0;
-      border: 1px solid var(--border);
-      border-top: 0;
-      border-radius: 0 0 10px 10px;
-      background: var(--surface);
-    }
-
-    .alternatives {
-      margin: -1px 8px 0;
-      border: 1px solid var(--border);
-      border-top: 0;
-      border-radius: 0 0 10px 10px;
-      background: var(--surface);
-      padding: 8px 10px 10px;
-    }
-    .alternative-label {
-      display: block;
-      margin: 0 2px 6px;
-      color: var(--muted);
-      font-size: .78rem;
-      font-weight: 600;
-    }
-    .alternatives a {
-      display: flex;
-      justify-content: space-between;
-      gap: 12px;
-      padding: 9px 10px;
-      border-radius: 9px;
-      background: var(--surface-2);
-      color: var(--text);
-      text-decoration: none;
-    }
-    .alternatives a:hover { outline: 1px solid var(--accent); }
-    .alternatives a span:last-child {
-      color: var(--muted);
-      font-size: .78rem;
-      overflow-wrap: anywhere;
-      text-align: right;
-    }
-
-    .versions summary {
-      padding: 10px 12px;
-      font-size: .9rem;
-      font-weight: 600;
-      color: var(--muted);
-      cursor: pointer;
-    }
-    .version-links {
-      display: grid;
-      gap: 6px;
-      padding: 0 10px 10px;
-    }
-    .version-links a {
-      display: flex;
-      justify-content: space-between;
-      gap: 12px;
-      padding: 9px 10px;
-      border-radius: 9px;
-      background: var(--surface-2);
-      color: var(--text);
-      text-decoration: none;
-    }
-    .version-links a:hover { outline: 1px solid var(--accent); }
-    .version-links span {
-      color: var(--muted);
-      font-size: .78rem;
-      overflow-wrap: anywhere;
-      text-align: right;
-    }
-    .emoji { font-size: 1.45rem; width: 30px; text-align: center; }
-    .card-title { font-weight: 600; }
-    .card-file { display: block; color: var(--muted); font-size: .78rem; margin-top: 2px; overflow-wrap: anywhere; }
-    .empty {
-      display: none;
-      padding: 20px;
-      text-align: center;
-      color: var(--muted);
-    }
-    footer { text-align: center; color: var(--muted); font-size: .85rem; padding: 10px 0 20px; }
-    @media (min-width: 700px) {
-      .toolbar { grid-template-columns: minmax(250px, 1fr) auto; }
-      .github-actions { min-width: 420px; }
-    }
-    @media (max-width: 430px) {
-      .page { padding: 12px; }
-      .github-actions { grid-template-columns: 1fr; }
-      .cards { grid-template-columns: 1fr; }
-    }
-  </style>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="color-scheme" content="light dark">
+<title>{{SITE_TITLE}} | Web Hub</title>
+<style>
+:root{--bg:#f4f6f8;--surface:#fff;--surface-2:#eef2f6;--text:#1f2933;--muted:#536273;--border:#d9e0e7;--accent:#1769aa;--accent-text:#fff;--shadow:0 2px 10px #00000012;color-scheme:light}
+@media(prefers-color-scheme:dark){:root:not([data-theme=light]){--bg:#101418;--surface:#171c21;--surface-2:#20272e;--text:#edf2f7;--muted:#aab4bf;--border:#46515f;--accent:#67b7f7;--accent-text:#08131c;--shadow:0 2px 10px #00000040;color-scheme:dark}}
+:root[data-theme=dark]{--bg:#101418;--surface:#171c21;--surface-2:#20272e;--text:#edf2f7;--muted:#aab4bf;--border:#46515f;--accent:#67b7f7;--accent-text:#08131c;--shadow:0 2px 10px #00000040;color-scheme:dark}
+*{box-sizing:border-box}[hidden]{display:none!important}body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;line-height:1.45}
+.page{width:min(1100px,100%);margin:auto;padding:18px}header{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:14px}h1{margin:0;font-size:clamp(1.55rem,5vw,2.25rem)}.subtitle{color:var(--muted);margin:4px 0 0}button,input,a{font:inherit}a{color:var(--accent)}button{touch-action:manipulation}.icon-button{min-width:44px;min-height:44px;border:1px solid var(--border);border-radius:12px;background:var(--surface);color:var(--text);cursor:pointer}
+.toolbar{display:grid;gap:10px;margin-bottom:10px}.search-box{display:flex;gap:6px;min-width:0}.search{width:100%;min-width:0;min-height:48px;border:1px solid var(--border);border-radius:13px;background:var(--surface);color:var(--text);padding:10px 14px}.github-actions{display:flex;flex-wrap:wrap;gap:8px}.action{display:flex;flex:1 1 125px;justify-content:center;align-items:center;min-height:46px;padding:8px 10px;border-radius:12px;text-decoration:none;text-align:center;border:1px solid var(--border);background:var(--surface);color:var(--text)}.action.primary{background:var(--accent);color:var(--accent-text);border-color:var(--accent)}
+.section{margin:0 0 14px;border:1px solid var(--border);border-radius:16px;background:var(--surface);box-shadow:var(--shadow);overflow:hidden}summary{cursor:pointer;min-height:44px;padding:12px 14px;font-weight:650;overflow-wrap:anywhere;touch-action:manipulation}.count{display:inline-block;margin-left:6px;padding:1px 8px;border-radius:999px;background:var(--surface-2);color:var(--muted);font-size:.8rem;font-variant-numeric:tabular-nums}
+.cards{padding:0 12px 12px;display:grid;grid-template-columns:repeat(auto-fit,minmax(min(270px,100%),1fr));gap:9px}.hub-item{min-width:0;align-self:start}.card{display:flex;align-items:center;gap:11px;min-height:64px;padding:12px;border:1px solid var(--border);border-radius:13px;background:var(--surface-2);color:var(--text);text-decoration:none;transition:transform .12s ease,border-color .12s ease}.card:hover{transform:translateY(-1px);border-color:var(--accent)}.card-copy{min-width:0}.emoji{font-size:1.45rem;flex:0 0 30px;text-align:center}.card-title{font-weight:650;overflow-wrap:anywhere}.card-file{display:block;font-size:.78rem;color:var(--muted);margin-top:4px;overflow-wrap:anywhere;word-break:break-word}.description{display:block;font-size:.88rem;color:var(--muted);margin-top:6px}.badge{display:inline-block;margin:4px 0 0 8px;padding:2px 7px;border:1px solid var(--border);border-radius:999px;color:var(--accent);font-size:.76rem;font-weight:650}
+.folder{margin:0 12px 12px;border-left:2px solid var(--border)}.folder>summary{font-size:.93rem;color:var(--muted)}.folder .folder{margin-left:8px}.versions{margin:0 8px;border:1px solid var(--border);border-top:0;border-radius:0 0 10px 10px}.versions>summary{font-size:.88rem;color:var(--muted)}.version-links{padding:0 10px 10px;display:grid;gap:7px}.version-row{background:var(--surface-2);border-radius:8px}.version-row a{display:block;min-height:44px;padding:10px;text-decoration:none;font-size:.9rem;overflow-wrap:anywhere;color:var(--text)}.alternative{display:block;min-height:44px;margin:0 8px;padding:10px 12px;background:var(--surface-2);border:1px solid var(--border);border-top:0;border-radius:0 0 8px 8px;text-decoration:none;font-weight:600}.alternative .card-file{font-weight:400}
+:focus-visible{outline:3px solid var(--accent);outline-offset:3px}.result-status,.build-info{color:var(--muted);font-size:.82rem;margin:8px 0 14px}.empty{padding:24px;text-align:center;background:var(--surface);border:1px solid var(--border);border-radius:13px}footer{padding:12px 0 24px;text-align:center;color:var(--muted);font-size:.85rem}footer a{display:inline-block;min-height:44px;padding:12px 8px}.skip-link{position:absolute;top:-100px;left:10px;background:var(--surface);padding:12px;z-index:5}.skip-link:focus{top:10px}noscript p{padding:12px;background:var(--surface)}
+@media(min-width:800px){.toolbar{grid-template-columns:minmax(240px,1fr) minmax(420px,1.3fr)}}@media(max-width:430px){.page{padding:12px}.cards{grid-template-columns:1fr}.github-actions .action{font-size:.88rem;flex-basis:90px;padding:8px 5px}.folder{margin-left:8px;margin-right:8px}.badge{margin-left:0;display:table}}@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important;scroll-behavior:auto!important}.card:hover{transform:none}}
+</style>
 </head>
 <body>
-  <main class="page">
-    <header>
-      <div>
-        <h1>Carl Saltzberg</h1>
-        <p class="subtitle">Web tools, apps, guides, and projects</p>
-      </div>
-      <button class="icon-button" id="themeButton" type="button" aria-label="Toggle light and dark mode">◐</button>
-    </header>
-
-    <div class="toolbar">
-      <input class="search" id="search" type="search" placeholder="Search pages…" aria-label="Search pages">
-      <nav class="github-actions" aria-label="GitHub shortcuts">
-        <a class="action primary" href="https://csaltzberg.github.io/GPT-Tools/index.html">🌐 Live Site</a>
-        <a class="action" href="https://github.com/csaltzberg/GPT-Tools/edit/main/index.html">✏️ Edit Index</a>
-        <a class="action" href="https://github.com/csaltzberg/GPT-Tools/upload/main">⬆️ Upload Files</a>
-      </nav>
-    </div>
-
-    <div id="sections">
-      <details class="section" open>
-        <summary>📱 Apps</summary>
-        <div class="cards">
-          <a class="card" href="QR-seek-app-redirect.html"><span class="emoji">🔎</span><span><span class="card-title">Seek</span><span class="card-file">QR-seek-app-redirect.html</span></span></a>
-        </div>
-      </details>
-
-      <details class="section" open>
-        <summary>🧰 Web Tools</summary>
-        <div class="cards">
-          <a class="card" href="road_trip_atlas.html"><span class="emoji">🗺️</span><span><span class="card-title">County Map Maker</span><span class="card-file">road_trip_atlas.html</span></span></a>
-
-        </div>
-      </details>
-
-
-      <details class="section" open>
-        <summary>🏫 TSC Work</summary>
-        <div class="cards">
-          <div class="tool-group">
-            <a class="card" href="TSC_OTS_Generator_v2_2_0.html">
-              <span class="emoji">📅</span>
-              <span>
-                <span class="card-title">TSC OTS Generator</span>
-                <span class="card-file">TSC_OTS_Generator_v2_2_0.html · Current</span>
-              </span>
-            </a>
-            <details class="versions">
-              <summary>Older versions</summary>
-              <div class="version-links">
-                <a href="TSC_OTS_Generator_v2_1_8.html">
-                  <span>TSC OTS Generator v2.1.8</span>
-                  <span>TSC_OTS_Generator_v2_1_8.html</span>
-                </a>
-                <a href="TSC_OTS_Generator_v2_1_5.html">
-                  <span>TSC OTS Generator v2.1.5</span>
-                  <span>TSC_OTS_Generator_v2_1_5.html</span>
-                </a>
-                <a href="TSC_OTS_Generator_v2_1.html">
-                  <span>TSC OTS Generator v2.1</span>
-                  <span>TSC_OTS_Generator_v2_1.html</span>
-                </a>
-                <a href="TSC_OTS_Generator_v2_0.html">
-                  <span>TSC OTS Generator v2.0</span>
-                  <span>TSC_OTS_Generator_v2_0.html</span>
-                </a>
-                <a href="TSC_OTS_Generator_v1_9.html">
-                  <span>TSC OTS Generator v1.9</span>
-                  <span>TSC_OTS_Generator_v1_9.html</span>
-                </a>
-                <a href="TSC_OTS_Generator_v1_8.html">
-                  <span>TSC OTS Generator v1.8</span>
-                  <span>TSC_OTS_Generator_v1_8.html</span>
-                </a>
-                <a href="TSC_OTS_Generator_v1_5.html">
-                  <span>TSC OTS Generator v1.5</span>
-                  <span>TSC_OTS_Generator_v1_5.html</span>
-                </a>
-              </div>
-            </details>
-          </div>
-          <a class="card" href="TSC_Logo_Generator_v1_2.html">
-            <span class="emoji">🎨</span>
-            <span>
-              <span class="card-title">TSC Logo Generator</span>
-              <span class="card-file">TSC_Logo_Generator_v1_2.html</span>
-            </span>
-          </a>
-        </div>
-      </details>
-
-      <details class="section" open>
-        <summary>🤖 GPT Tools</summary>
-        <div class="cards">
-          <a class="card" href="canvas_banner.html"><span class="emoji">🖼️</span><span><span class="card-title">Canvas Banner</span><span class="card-file">canvas_banner.html</span></span></a>
-        </div>
-      </details>
-
-      <details class="section">
-        <summary>📄 Articles</summary>
-        <div class="cards">
-          <a class="card" href="Articles/Spandrels1979.html"><span class="emoji">📚</span><span><span class="card-title">Spandrels 1979</span><span class="card-file">Articles/Spandrels1979.html</span></span></a>
-        </div>
-      </details>
-
-      <details class="section">
-        <summary>🦆 Duck Game</summary>
-        <div class="cards">
-          <a class="card" href="ducks.html"><span class="emoji">🦆</span><span><span class="card-title">Ducks</span><span class="card-file">ducks.html</span></span></a>
-          <a class="card" href="ducks_2.html"><span class="emoji">🐤</span><span><span class="card-title">Ducks 2</span><span class="card-file">ducks_2.html</span></span></a>
-        </div>
-      </details>
-
-      <details class="section">
-        <summary>🧪 Experiments</summary>
-        <div class="cards">
-          <a class="card" href="Experiments/confetti.html"><span class="emoji">🎊</span><span><span class="card-title">Confetti</span><span class="card-file">Experiments/confetti.html</span></span></a>
-          <a class="card" href="Experiments/image_compare_slider.html"><span class="emoji">↔️</span><span><span class="card-title">Image Comparison Slider</span><span class="card-file">Experiments/image_compare_slider.html</span></span></a>
-        </div>
-      </details>
-
-
-      <details class="section">
-        <summary>🧱 LEGO</summary>
-        <div class="cards">
-          <div class="tool-group">
-            <a class="card" href="Lego/SkywalkerSaga/lego_star_wars_skywalker_saga_codes.html">
-              <span class="emoji">🌐</span>
-              <span>
-                <span class="card-title">LEGO Star Wars: The Skywalker Saga Codes</span>
-                <span class="card-file">Webpage</span>
-              </span>
-            </a>
-            <div class="alternatives">
-              <span class="alternative-label">Also available as</span>
-              <a href="Lego/SkywalkerSaga/lego_star_wars_skywalker_saga_codes.pdf" target="_blank" rel="noopener">
-                <span>🖨️ Printable PDF</span>
-                <span>lego_star_wars_skywalker_saga_codes.pdf</span>
-              </a>
-            </div>
-          </div>
-        </div>
-      </details>
-
-      <details class="section">
-        <summary>📖 Guides</summary>
-        <div class="cards">
-          <a class="card" href="switch_1_pro_controller_shell_swap.html"><span class="emoji">🎮</span><span><span class="card-title">Nintendo Switch 1 Pro Controller Shell Swap</span><span class="card-file">switch_1_pro_controller_shell_swap.html</span></span></a>
-        </div>
-      </details>
-    </div>
-
-    <div class="empty" id="empty">No pages match your search.</div>
-    <footer>GPT-Tools Hub</footer>
-  </main>
-
-  <script>
-    const search = document.getElementById('search');
-    const sections = [...document.querySelectorAll('.section')];
-    const empty = document.getElementById('empty');
-    const themeButton = document.getElementById('themeButton');
-
-    search.addEventListener('input', () => {
-      const query = search.value.trim().toLowerCase();
-      let visibleCards = 0;
-
-      sections.forEach(section => {
-        const standaloneCards = [...section.querySelectorAll('.cards > .card')];
-        const toolGroups = [...section.querySelectorAll('.tool-group')];
-        let sectionMatches = 0;
-
-        standaloneCards.forEach(card => {
-          const matches = card.textContent.toLowerCase().includes(query);
-          card.hidden = !matches;
-          if (matches) sectionMatches++;
-        });
-
-        toolGroups.forEach(toolGroup => {
-          const currentCard = toolGroup.querySelector('.card');
-          const versionGroup = toolGroup.querySelector('.versions');
-          const versionLinks = versionGroup ? [...versionGroup.querySelectorAll('.version-links a')] : [];
-          const alternativeLinks = [...toolGroup.querySelectorAll('.alternatives a')];
-          const currentMatches = currentCard.textContent.toLowerCase().includes(query);
-          let archivedMatches = 0;
-          let alternativeMatches = 0;
-
-          alternativeLinks.forEach(link => {
-            const matches = link.textContent.toLowerCase().includes(query);
-            link.hidden = query ? !matches : false;
-            if (matches) alternativeMatches++;
-          });
-
-          versionLinks.forEach(link => {
-            const matches = link.textContent.toLowerCase().includes(query);
-            link.hidden = query ? !matches : false;
-            if (matches) archivedMatches++;
-          });
-
-          const groupMatches = currentMatches || archivedMatches > 0 || alternativeMatches > 0 || !query;
-          toolGroup.hidden = !groupMatches;
-
-          if (versionGroup) {
-            versionGroup.hidden = false;
-            if (query && archivedMatches > 0) versionGroup.open = true;
-          }
-
-          if (groupMatches) sectionMatches++;
-        });
-
-        section.hidden = sectionMatches === 0;
-        if (query && sectionMatches) section.open = true;
-        visibleCards += sectionMatches;
-      });
-
-      empty.style.display = visibleCards ? 'none' : 'block';
+<a class="skip-link" href="#sections">Skip to resources</a>
+<main class="page">
+<header><div><h1>{{SITE_TITLE}}</h1><p class="subtitle">{{SITE_SUBTITLE}}</p></div><button class="icon-button" id="themeButton" type="button" aria-label="Toggle light and dark mode" hidden>◐</button></header>
+<div class="toolbar">
+<div class="search-box" id="searchBox" hidden><input class="search" id="search" type="search" placeholder="Search pages, folders, and versions…" aria-label="Search pages, folders, and versions"><button class="icon-button" id="clearSearch" type="button" aria-label="Clear search">×</button></div>
+<nav class="github-actions" aria-label="GitHub shortcuts"><a class="action primary" href="https://github.com/csaltzberg/GPT-Tools/tree/main">📁 Manage Files</a><a class="action" href="https://github.com/csaltzberg/GPT-Tools/upload/main">⬆️ Upload Files</a><a class="action" href="https://github.com/csaltzberg/GPT-Tools/edit/main/hub_config.json">⚙️ Organize Hub</a></nav>
+</div>
+<p class="build-info">{{BUILD_INFO}}</p><p class="result-status" id="resultStatus" role="status" aria-live="polite" hidden></p>
+<noscript><p>All resource links and folder controls work without JavaScript. Enable JavaScript for search and a manual theme switch.</p></noscript>
+<div id="sections" tabindex="-1">
+<!-- HUB:START -->
+<p>This is the repository's hub template. The build inserts the current folder and file list here. <a href="https://csaltzberg.github.io/GPT-Tools/">Open the published Web Hub</a>.</p>
+<!-- HUB:END -->
+</div>
+<p class="empty" id="emptyState" hidden>No resources match your search.</p>
+<footer>New folders and pages appear after a successful site build.<br><a href="https://csaltzberg.github.io/GPT-Tools/">Live Site</a> · <a href="https://github.com/csaltzberg/GPT-Tools/edit/main/index.html">Edit Index Layout</a> · <a href="https://github.com/csaltzberg/GPT-Tools/blob/main/docs/HUB_GUIDE.md">Hub Guide</a></footer>
+</main>
+<script>
+(() => {
+  'use strict';
+  const search = document.getElementById('search');
+  const sections = [...document.querySelectorAll('.section')];
+  const details = [...document.querySelectorAll('#sections details')];
+  const items = [...document.querySelectorAll('.hub-item')];
+  const status = document.getElementById('resultStatus');
+  const storageKey = 'GPT-Tools:hub-sections:v1';
+  let saved = {}, beforeSearch = null;
+  try { const value = JSON.parse(localStorage.getItem(storageKey) || '{}'); if(value && typeof value === 'object' && !Array.isArray(value)) saved = value; } catch {}
+  for (const d of details) {
+    const key = d.dataset.category || d.dataset.folder;
+    if (key && typeof saved[key] === 'boolean') d.open = saved[key];
+    d.addEventListener('toggle', () => {
+      if (!key || search.value.trim()) return;
+      saved[key] = d.open;
+      try { localStorage.setItem(storageKey, JSON.stringify(saved)); } catch {}
     });
-
-    themeButton.addEventListener('click', () => {
-      const root = document.documentElement;
-      const current = root.dataset.theme;
-      if (!current) {
-        const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-        root.dataset.theme = prefersDark ? 'light' : 'dark';
-      } else if (current === 'dark') {
-        root.dataset.theme = 'light';
-      } else {
-        root.dataset.theme = 'dark';
+  }
+  function filter() {
+    const tokens = search.value.trim().toLowerCase().split(/\s+/).filter(Boolean);
+    if (tokens.length && beforeSearch === null) beforeSearch = new Map(details.map(d => [d, d.open]));
+    let total = 0;
+    for (const section of sections) {
+      let count = 0;
+      for (const item of section.querySelectorAll('.hub-item')) {
+        const folderLabels = [];
+        for(let parent = item.parentElement; parent && parent !== section; parent = parent.parentElement) {
+          if(parent.classList.contains('folder')) folderLabels.push(parent.querySelector('summary')?.textContent || '');
+        }
+        const haystack = [item.dataset.search, section.dataset.category, section.querySelector('summary')?.textContent, ...folderLabels].join(' ').toLowerCase();
+        const matched = tokens.every(t => haystack.includes(t));
+        item.hidden = !matched;
+        if (matched) {
+          count++; total++;
+          const versions = item.querySelector('.versions');
+          if (versions && tokens.length && [...versions.querySelectorAll('.version-row')].some(v => tokens.every(t => (v.dataset.search + ' ' + item.querySelector('.card-title').textContent.toLowerCase()).includes(t)))) versions.open = true;
+        }
       }
-    });
-  </script>
+      for (const folder of [...section.querySelectorAll('.folder')].reverse()) {
+        folder.hidden = !folder.querySelector('.hub-item:not([hidden])');
+        if(tokens.length && !folder.hidden) folder.open = true;
+      }
+      section.hidden = count === 0;
+      section.querySelector('.count').textContent = String(count);
+      if(tokens.length && count) section.open = true;
+    }
+    if (!tokens.length && beforeSearch) {
+      for(const [d, open] of beforeSearch) d.open = open;
+      beforeSearch = null;
+    }
+    status.textContent = tokens.length ? `Showing ${total} of ${items.length} resources.` : `${items.length} resources in ${sections.length} categories.`;
+    document.getElementById('emptyState').hidden = total !== 0;
+  }
+  document.getElementById('searchBox').hidden = false;
+  status.hidden = false;
+  search.addEventListener('input', filter);
+  function clear() { search.value = ''; filter(); search.focus(); }
+  document.getElementById('clearSearch').addEventListener('click', clear);
+  search.addEventListener('keydown', e => { if(e.key === 'Escape') { e.preventDefault(); clear(); } });
+  const theme = document.getElementById('themeButton');
+  try { const value = localStorage.getItem('web-hub-theme'); if(['light','dark'].includes(value)) document.documentElement.dataset.theme = value; } catch {}
+  theme.hidden = false;
+  theme.addEventListener('click', () => {
+    const current = document.documentElement.dataset.theme;
+    const dark = current ? current === 'dark' : matchMedia('(prefers-color-scheme:dark)').matches;
+    const next = dark ? 'light' : 'dark';
+    document.documentElement.dataset.theme = next;
+    try { localStorage.setItem('web-hub-theme', next); } catch {}
+  });
+  filter();
+})();
+</script>
 </body>
 </html>
