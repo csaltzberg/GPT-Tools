@@ -1,0 +1,77 @@
+name: Build and validate Web Hub
+on:
+  push:
+    branches: [main, reorganize-hub]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: hub-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  build:
+    # Playwright 1.57 is tested on Ubuntu 24.04; do not track ubuntu-latest.
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    env:
+      HUB_MIGRATION_AUDIT: ${{ (github.ref == 'refs/heads/reorganize-hub' || github.head_ref == 'reorganize-hub') && '1' || '0' }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Unit, file preservation, and link tests
+        run: python -m unittest discover -s tests -v
+      - name: Build deployment copy
+        run: python scripts/build_manifest.py --root . --output _site
+      - name: Install pinned browser test dependency
+        run: |
+          python -m pip install playwright==1.57.0
+          python -m playwright install --with-deps chromium
+      - name: Browser and legacy URL regression checks
+        run: python tests/browser_checks.py --site _site --report-dir /tmp/hub-browser
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: hub-browser-report
+          path: /tmp/hub-browser/
+          retention-days: 14
+          if-no-files-found: ignore
+      - name: Source recovery archive (no credentials)
+        if: always()
+        run: git archive --format=zip --output=/tmp/hub-review-source.zip HEAD
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: hub-review-source
+          path: /tmp/hub-review-source.zip
+          retention-days: 14
+      - uses: actions/upload-artifact@v4
+        with:
+          name: hub-preview
+          path: _site/
+          include-hidden-files: true
+          retention-days: 14
+      - uses: actions/upload-pages-artifact@v4
+        if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+        with:
+          path: _site/
+  deploy:
+    if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+    needs: build
+    runs-on: ubuntu-24.04
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/configure-pages@v5
+      - name: Deploy approved main version
+        id: deployment
+        uses: actions/deploy-pages@v4

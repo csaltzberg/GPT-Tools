@@ -1,0 +1,180 @@
+{
+  "baseline_commit": "d293f7e15fbc7b20904a0eaa045ddf2f6f515fc8",
+  "moves": [
+    {
+      "from": "QR-seek-app-redirect.html",
+      "to": "Apps/Seek/QR-seek-app-redirect.html",
+      "sha256": "29d3f3e244e94ac6fd8d2907513373b1a0c0db957fac368f3d2ce16e944bb029",
+      "git_blob": "610bdd32b0148c11065e7a6b64ba9ec5c2266395"
+    },
+    {
+      "from": "road_trip_atlas.html",
+      "to": "Web-Tools/County-Map-Maker/road_trip_atlas.html",
+      "sha256": "1b8f71b9fbdae0f8f316a14ee4926af825d90f8ce7131441980052ca6876797c",
+      "git_blob": "459ad074940ff93efdc8baceba121aa4c6aedfb3"
+    },
+    {
+      "from": "TSC_Logo_Generator_v1_2.html",
+      "to": "TSC-Work/Logo-Generator/TSC_Logo_Generator_v1_2.html",
+      "sha256": "ce370d70ac10adbd8d3c82b80879c4654dbdb89b2d4970a24f85e1ca4c095c02",
+      "git_blob": "4a94c8bb4fb82a437f890a07017e54486af76e30"
+    },
+    {
+      "from": "canvas_banner.html",
+      "to": "GPT-Tools/Canvas-Banner/canvas_banner.html",
+      "sha256": "6e6a388b171bdff34e05e6f8874c533985e0a2c9e059f216949d2405de3d1ca5",
+      "git_blob": "27d1bb086cf80fc720c4196e6cfa83ebf00c4fb5"
+    },
+    {
+      "from": "Articles/Spandrels1979.html",
+      "to": "Articles/Spandrels-1979/Spandrels1979.html",
+      "sha256": "fccf016558b8375e8bedfd2fc33dfa13731b8bc4c8ef1b85aa3a042737f2147b",
+      "git_blob": "4d7339d6b2b3283ab0f6c12b75a5a41b084d16c7"
+    },
+    {
+      "from": "ducks.html",
+      "to": "Duck-Game/ducks.html",
+      "sha256": "2e353264f503a9e6deac74a762e898cf342e8aa8415ea4b86223231529e2fbb6",
+      "git_blob": "d3afc4bdfa884f6c5a5da5d5e3cc407f5f8959e4"
+    },
+    {
+      "from": "ducks_2.html",
+      "to": "Duck-Game/ducks_2.html",
+      "sha256": "e87026d4a5e241da2b971f9c6b51ca7b5994cbb188288ff375a5998506548091",
+      "git_blob": "ce032473da4438f187a8d623e6afce81bf945674"
+    },
+    {
+      "from": "duck-quack.wav",
+      "to": "Duck-Game/duck-quack.wav",
+      "sha256": "519913e0470a7e6705945f28a7ee9b7a9829be91725b94ef3cfd998b89ae88db",
+      "git_blob": "c602f1c61a6097d73037a3ab28b316fc8873d7c0"
+    },
+    {
+      "from": "duck-quack.mp3",
+      "to": "Duck-Game/duck-quack.mp3",
+      "sha256": "3048c749898a70b3f9302972e43b2bfaf1b0e6fde109208bc5d25efeda5c2ea2",
+      "git_blob": "69aa24a6af7f70c04e8ca297ea366ca18551c99e"
+    },
+    {
+      "from": "date_time_picker_comparison.html",
+      "to": "Experiments/date_time_picker_comparison.html",
+      "sha256": "f3a21938c87f7f64306b74b81ef5a97b4d4fae5b236aab51837d28457d02dbca",
+      "git_blob": "e28e2e71ef6a41a138ee6c4e15da99362406f8c8"
+    },
+    {
+      "from": "switch_1_pro_controller_shell_swap.html",
+      "to": "Guides/Switch-Pro-Controller/switch_1_pro_controller_shell_swap.html",
+      "sha256": "87227c20e637494cc53974ce6ae295182025320cce80b10abb00808ede133bba",
+      "git_blob": "6fad3d74146d94c2aada856d5571ab87e4e69675"
+    },
+    {
+      "from": "campus-map-demo.zip",
+      "to": "Archives/Source-Packages/campus-map-demo.zip",
+      "sha256": "519d4f0de3da7e1d1558907c0064aa0d1a4d69ec15f5553c3e42b1e5b5cd2d3d",
+      "git_blob": "e2d84815247383f06e4313cda302dafafe47d415"
+    },
+    {
+      "from": "TSC_OTS_Generator_v1_5.html",
+      "to": "TSC-Work/OTS-Generator/TSC_OTS_Generator_v1_5.html",
+      "sha256": "d28779205980898b26c3307cdbafb6bb6b7dcca3f35513f20657bf27a060167c",
+      "git_blob": "09b90ed982f20ff18104369a8d92b32795a80061"
+    },
+    {
+      "from": "TSC_OTS_Generator_v1_8.html",
+      "to": "TSC-Work/OTS-Generator/TSC_OTS_Generator_v1_8.html",
+      "sha256": "3b2d8d0a776944ba0975c00c1c65e3d8d484c2777eb411fcfa29749ee2088493",
+      "git_blob": "78214711d02e1ebb3387a01806ffb5c407664b25"
+    },
+    {
+      "from": "TSC_OTS_Generator_v1_9.html",
+      "to": "TSC-Work/OTS-Generator/TSC_OTS_Generator_v1_9.html",
+      "sha256": "11c9eea7cef63bbd81619b730e53e1519bf3c3bccac86a6fe559470dba23e99e",
+      "git_blob": "e3c21242860da85c7e2db09ee64f8fa83435d5f3"
+    },
+    {
+      "from": "TSC_OTS_Generator_v2_0.html",
+      "to": "TSC-Work/OTS-Generator/TSC_OTS_Generator_v2_0.html",
+      "sha256": "45f16f6697543075b9d1b3abb2a825a76077bb98d7b4ee0b7a0bec9a46678e85",
+      "git_blob": "fe28cd2885acca25dc521e8a5256160da5844eec"
+    },
+    {
+      "from": "TSC_OTS_Generator_v2_1.html",
+      "to": "TSC-Work/OTS-Generator/TSC_OTS_Generator_v2_1.html",
+      "sha256": "fdc1921f2bd0f47dbf30a4d9ef7739481b38ec503a9ed1d8ddf1f09b1a2a3e5a",
+      "git_blob": "7bd81d912712b1b3019bad74378ff3ecd9f678f7"
+    },
+    {
+      "from": "TSC_OTS_Generator_v2_1_5.html",
+      "to": "TSC-Work/OTS-Generator/TSC_OTS_Generator_v2_1_5.html",
+      "sha256": "6e59e2e11590d74f79c5958e1157df4cf6534408b9761dd5d4d696f48ceb7858",
+      "git_blob": "1e9b40d6dc88a5e2001bced139eede99efe2fdf7"
+    },
+    {
+      "from": "TSC_OTS_Generator_v2_1_8.html",
+      "to": "TSC-Work/OTS-Generator/TSC_OTS_Generator_v2_1_8.html",
+      "sha256": "6df030e9a04bd13bf2659f65cd40ced753eb04d38e5be34006cd41825d5e76e8",
+      "git_blob": "7ed89b89ccf39ebef436274b5bd8896988500944"
+    },
+    {
+      "from": "TSC_OTS_Generator_v2_2_0.html",
+      "to": "TSC-Work/OTS-Generator/TSC_OTS_Generator_v2_2_0.html",
+      "sha256": "d44532759d52f1aa3ddf5b115994f86b51ad2e33bb56b66606a3d54c0ab82b4b",
+      "git_blob": "6ac08fd5dcc9fd8ac5ebf14bb23cb5b09d37d96c"
+    },
+    {
+      "from": "Articles/Figure1_Spandrels1979.jpg",
+      "to": "Articles/Spandrels-1979/Figure1_Spandrels1979.jpg",
+      "sha256": "65986a56c6c750e59760ee6886d5979fac2a37b2491efac508c3616353fafed5",
+      "git_blob": "ace63babf0ec0f7fce06a31da6202d949eeb9028"
+    },
+    {
+      "from": "Articles/Figure2_Spandrels1979.jpg",
+      "to": "Articles/Spandrels-1979/Figure2_Spandrels1979.jpg",
+      "sha256": "8aeba3e0363fc1a1eed5155705d58838405d66a7b9764dda2a1865def5671443",
+      "git_blob": "9edca805a42c4b44575be2a69004e0da6af6f0fa"
+    },
+    {
+      "from": "Articles/Figure3_Spandrels1979.jpg",
+      "to": "Articles/Spandrels-1979/Figure3_Spandrels1979.jpg",
+      "sha256": "676dcf5dca5d9945dbdd4582d3c5864518db86aa8ff651742660d30f741abd80",
+      "git_blob": "4845a63c6ba1cc73c8eb6b4852c7ca9aa59f5522"
+    }
+  ],
+  "removed_empty_placeholders": [
+    "Articles/File",
+    "Experiments/A"
+  ],
+  "extracted": [
+    {
+      "member": "campus-map-demo/index.html",
+      "path": "Experiments/Campus-Map/index.html",
+      "sha256": "e9810e917583e465bb4ab3ac26ab1b18ae5039f81c3315cbbfeaca73af7de26d"
+    },
+    {
+      "member": "campus-map-demo/data/buildings.geojson",
+      "path": "Experiments/Campus-Map/data/buildings.geojson",
+      "sha256": "5d77cf958bcc8688dc195b4a0418cc5303bd9c10c029b3bc6e722e0791f16d4e"
+    },
+    {
+      "member": "campus-map-demo/data/rooms_SM.geojson",
+      "path": "Experiments/Campus-Map/data/rooms_SM.geojson",
+      "sha256": "6fe185b51cb14090b88f1f0a07566ae80fe39d4d2a9e6667faacb194bebb0e4c"
+    },
+    {
+      "member": "campus-map-demo/img/SM_F1.png",
+      "path": "Experiments/Campus-Map/img/SM_F1.png",
+      "sha256": "ceefaec771c20cdc5b145767e6b3899d513fcdced084bd5be7418b0ce2d256ad"
+    },
+    {
+      "member": "campus-map-demo/img/SM_F2.png",
+      "path": "Experiments/Campus-Map/img/SM_F2.png",
+      "sha256": "78730fdca0972133ca48bf0caca67f27ace007372191467b4042ca89377e2f3e"
+    },
+    {
+      "member": "campus-map-demo/img/SM_F3.png",
+      "path": "Experiments/Campus-Map/img/SM_F3.png",
+      "sha256": "21c8bc651235a11d0a0743e4f92ab3edb48097d754736ee2b2a8f26cd9d07566"
+    }
+  ],
+  "notes": "All moved content is byte-identical to the baseline. No application fixes or version relabeling."
+}

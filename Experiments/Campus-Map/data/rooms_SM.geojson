@@ -1,0 +1,226 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "properties": {
+        "buildingId": "SM",
+        "floor": 1,
+        "label": "SM 103",
+        "type": "Room",
+        "notes": "Demo marker"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          270,
+          230
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "buildingId": "SM",
+        "floor": 1,
+        "label": "SM 116",
+        "type": "Room",
+        "notes": "Demo marker"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          610,
+          230
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "buildingId": "SM",
+        "floor": 1,
+        "label": "SM 268",
+        "type": "Room",
+        "notes": "Demo marker"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          940,
+          230
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "buildingId": "SM",
+        "floor": 1,
+        "label": "SM 101",
+        "type": "Room",
+        "notes": "Demo marker"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          320,
+          590
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "buildingId": "SM",
+        "floor": 1,
+        "label": "SM 116 (Lab)",
+        "type": "Room",
+        "notes": "Demo marker"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          820,
+          590
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "buildingId": "SM",
+        "floor": 2,
+        "label": "SM 201",
+        "type": "Room",
+        "notes": "Demo marker"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          320,
+          235
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "buildingId": "SM",
+        "floor": 2,
+        "label": "SM 215",
+        "type": "Room",
+        "notes": "Demo marker"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          820,
+          235
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "buildingId": "SM",
+        "floor": 2,
+        "label": "SM 240",
+        "type": "Room",
+        "notes": "Demo marker"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          370,
+          590
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "buildingId": "SM",
+        "floor": 2,
+        "label": "SM 255",
+        "type": "Room",
+        "notes": "Demo marker"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          870,
+          590
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "buildingId": "SM",
+        "floor": 3,
+        "label": "SM 301",
+        "type": "Room",
+        "notes": "Demo marker"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          320,
+          235
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "buildingId": "SM",
+        "floor": 3,
+        "label": "SM 320",
+        "type": "Room",
+        "notes": "Demo marker"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          820,
+          235
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "buildingId": "SM",
+        "floor": 3,
+        "label": "SM 340",
+        "type": "Room",
+        "notes": "Demo marker"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          320,
+          590
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "buildingId": "SM",
+        "floor": 3,
+        "label": "SM 360",
+        "type": "Room",
+        "notes": "Demo marker"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          820,
+          590
+        ]
+      }
+    }
+  ]
+}
