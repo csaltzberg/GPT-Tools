@@ -1,0 +1,342 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Campus Map Demo (Leaflet)</title>
+
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <style>
+    html, body { height: 100%; margin: 0; font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; }
+    #app { display: grid; grid-template-columns: 360px 1fr; height: 100%; }
+    #sidebar { padding: 12px; border-right: 1px solid #ddd; overflow: auto; }
+    #map { height: 100%; }
+    .row { display: grid; gap: 8px; margin-bottom: 10px; }
+    label { font-size: 13px; color: #333; }
+    input, select, button { padding: 8px 10px; font-size: 14px; border: 1px solid #bbb; border-radius: 8px; }
+    button { cursor: pointer; }
+    .results { margin-top: 10px; }
+    .result { padding: 10px; border: 1px solid #e1e1e1; border-radius: 10px; margin-bottom: 8px; cursor: pointer; }
+    .muted { color: #666; font-size: 13px; }
+    .divider { height: 1px; background: #eee; margin: 12px 0; }
+    code { background:#f4f4f4; padding:2px 6px; border-radius:6px; }
+  </style>
+</head>
+<body>
+<div id="app">
+  <div id="sidebar">
+    <h2 style="margin: 4px 0 10px 0;">Campus Map Demo</h2>
+    <div class="muted" style="margin-bottom:10px;">
+      Outdoor = OpenStreetMap tiles + building markers.<br>
+      Indoor = floorplan image + room markers (pixel coordinates).<br>
+      Try searching: <code>SM 103</code>, <code>SM 268</code>, <code>Science</code>.
+    </div>
+
+    <div class="row">
+      <label for="mode">Mode</label>
+      <select id="mode">
+        <option value="outdoor">Outdoor (Campus)</option>
+        <option value="indoor">Indoor (Building)</option>
+      </select>
+    </div>
+
+    <div class="row">
+      <label for="building">Building</label>
+      <select id="building"></select>
+    </div>
+
+    <div class="row">
+      <label for="floor">Floor</label>
+      <select id="floor"></select>
+    </div>
+
+    <div class="divider"></div>
+
+    <div class="row">
+      <label for="search">Search</label>
+      <input id="search" placeholder="Type and press Enter" />
+      <button id="searchBtn">Search</button>
+      <div class="muted">Searches buildings (outdoor) and rooms (indoor).</div>
+    </div>
+
+    <div class="divider"></div>
+
+    <div class="results" id="results"></div>
+
+    <div class="divider"></div>
+    <div class="muted">
+      If you host this on GitHub Pages/Netlify, it works as-is.<br>
+      If you open it from disk and it fails to load data, use a simple local web server.
+    </div>
+  </div>
+
+  <div id="map"></div>
+</div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+/** =========================
+ *  CONFIG
+ *  ========================= */
+const OUTDOOR_START = { lat: 30.4543, lng: -84.2901, zoom: 17 };
+const BUILDINGS_GEOJSON_URL = "data/buildings.geojson";
+
+const INDOOR_CONFIG = {
+  "SM": {
+    name: "Science and Mathematics (SM)",
+    roomsGeoJsonUrl: "data/rooms_SM.geojson",
+    floors: {
+      1: { imageUrl: "img/SM_F1.png", width: 1200, height: 800 },
+      2: { imageUrl: "img/SM_F2.png", width: 1200, height: 800 },
+      3: { imageUrl: "img/SM_F3.png", width: 1200, height: 800 }
+    }
+  }
+};
+
+/** =========================
+ *  STATE
+ *  ========================= */
+let buildingsFC = null;
+let roomsFCByBuilding = new Map();
+let currentMode = "outdoor";
+let currentBuildingId = "SM";
+let currentFloor = 1;
+
+let map = null;
+let buildingsLayer = null;
+let indoorImageOverlay = null;
+let indoorRoomsLayer = null;
+
+const modeEl = document.getElementById("mode");
+const buildingEl = document.getElementById("building");
+const floorEl = document.getElementById("floor");
+const searchEl = document.getElementById("search");
+const searchBtnEl = document.getElementById("searchBtn");
+const resultsEl = document.getElementById("results");
+
+modeEl.addEventListener("change", () => { currentMode = modeEl.value; renderMode(); });
+buildingEl.addEventListener("change", async () => {
+  currentBuildingId = buildingEl.value;
+  await ensureRoomsLoaded(currentBuildingId);
+  populateFloorDropdown();
+  currentFloor = Number(floorEl.value);
+  if (currentMode === "indoor") renderIndoor();
+});
+floorEl.addEventListener("change", () => { currentFloor = Number(floorEl.value); if (currentMode === "indoor") renderIndoor(); });
+searchBtnEl.addEventListener("click", () => doSearch(searchEl.value));
+searchEl.addEventListener("keydown", (e) => { if (e.key === "Enter") doSearch(searchEl.value); });
+
+(async function main() {
+  initMapOutdoor();
+  await loadBuildings();
+  populateBuildingDropdown();
+  await ensureRoomsLoaded(currentBuildingId);
+  populateFloorDropdown();
+  renderMode();
+})();
+
+function initMapOutdoor() {
+  map = L.map("map").setView([OUTDOOR_START.lat, OUTDOOR_START.lng], OUTDOOR_START.zoom);
+  L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+    maxZoom: 20,
+    attribution: '&copy; OpenStreetMap contributors'
+  }).addTo(map);
+}
+
+async function loadBuildings() {
+  const res = await fetch(BUILDINGS_GEOJSON_URL);
+  if (!res.ok) throw new Error("Failed to load buildings.geojson");
+  buildingsFC = await res.json();
+
+  buildingsLayer = L.geoJSON(buildingsFC, {
+    pointToLayer: (feature, latlng) => L.circleMarker(latlng, { radius: 7 }),
+    onEachFeature: (feature, layer) => {
+      const p = feature.properties || {};
+      layer.bindPopup(`<b>${escapeHtml(p.name || p.id)}</b><br><span class="muted">${escapeHtml(p.id || "")}</span>`);
+      layer.on("click", async () => {
+        const id = p.id;
+        if (id && INDOOR_CONFIG[id]) {
+          currentBuildingId = id;
+          buildingEl.value = id;
+          await ensureRoomsLoaded(id);
+          populateFloorDropdown();
+          currentFloor = Number(floorEl.value);
+          currentMode = "indoor";
+          modeEl.value = "indoor";
+          renderMode();
+        }
+      });
+    }
+  }).addTo(map);
+}
+
+async function ensureRoomsLoaded(buildingId) {
+  if (!INDOOR_CONFIG[buildingId]) return;
+  if (roomsFCByBuilding.has(buildingId)) return;
+  const url = INDOOR_CONFIG[buildingId].roomsGeoJsonUrl;
+  const res = await fetch(url);
+  if (!res.ok) throw new Error(`Failed to load rooms for ${buildingId}`);
+  const fc = await res.json();
+  roomsFCByBuilding.set(buildingId, fc);
+}
+
+function populateBuildingDropdown() {
+  const options = Object.keys(INDOOR_CONFIG).map(id => {
+    const name = INDOOR_CONFIG[id].name || id;
+    return `<option value="${escapeAttr(id)}">${escapeHtml(name)}</option>`;
+  }).join("");
+  buildingEl.innerHTML = options;
+  buildingEl.value = currentBuildingId;
+}
+
+function populateFloorDropdown() {
+  const cfg = INDOOR_CONFIG[currentBuildingId];
+  const floors = Object.keys(cfg.floors).map(n => Number(n)).sort((a,b) => a-b);
+  floorEl.innerHTML = floors.map(f => `<option value="${f}">${f}</option>`).join("");
+  if (!floors.includes(currentFloor)) currentFloor = floors[0];
+  floorEl.value = String(currentFloor);
+}
+
+function renderMode() {
+  if (currentMode === "outdoor") renderOutdoor();
+  else renderIndoor();
+}
+
+function renderOutdoor() {
+  map.remove();
+  initMapOutdoor();
+  if (buildingsFC) loadBuildingsFromCache();
+}
+
+function loadBuildingsFromCache() {
+  buildingsLayer = L.geoJSON(buildingsFC, {
+    pointToLayer: (feature, latlng) => L.circleMarker(latlng, { radius: 7 }),
+    onEachFeature: (feature, layer) => {
+      const p = feature.properties || {};
+      layer.bindPopup(`<b>${escapeHtml(p.name || p.id)}</b><br><span class="muted">${escapeHtml(p.id || "")}</span>`);
+      layer.on("click", async () => {
+        const id = p.id;
+        if (id && INDOOR_CONFIG[id]) {
+          currentBuildingId = id;
+          buildingEl.value = id;
+          await ensureRoomsLoaded(id);
+          populateFloorDropdown();
+          currentFloor = Number(floorEl.value);
+          currentMode = "indoor";
+          modeEl.value = "indoor";
+          renderMode();
+        }
+      });
+    }
+  }).addTo(map);
+}
+
+function renderIndoor() {
+  const cfg = INDOOR_CONFIG[currentBuildingId];
+  if (!cfg) return;
+
+  map.remove();
+  map = L.map("map", { crs: L.CRS.Simple, minZoom: -4 });
+
+  const floorCfg = cfg.floors[currentFloor];
+  const bounds = [[0, 0], [floorCfg.height, floorCfg.width]];
+  indoorImageOverlay = L.imageOverlay(floorCfg.imageUrl, bounds).addTo(map);
+  map.fitBounds(bounds);
+
+  const roomsFC = roomsFCByBuilding.get(currentBuildingId);
+  if (roomsFC) {
+    if (indoorRoomsLayer) indoorRoomsLayer.remove();
+    indoorRoomsLayer = L.geoJSON(roomsFC, {
+      filter: (feature) => Number(feature.properties?.floor) === Number(currentFloor),
+      pointToLayer: (feature) => {
+        const [x, y] = feature.geometry.coordinates;
+        return L.circleMarker([y, x], { radius: 6 });
+      },
+      onEachFeature: (feature, layer) => {
+        const p = feature.properties || {};
+        const title = p.label || "Room";
+        const subtitle = `${p.type || ""}${p.type && p.notes ? " - " : ""}${p.notes || ""}`;
+        layer.bindPopup(`<b>${escapeHtml(title)}</b><br><span class="muted">${escapeHtml(subtitle)}</span>`);
+      }
+    }).addTo(map);
+  }
+}
+
+function doSearch(raw) {
+  const q = (raw || "").trim().toLowerCase();
+  resultsEl.innerHTML = "";
+  if (!q) return;
+
+  const results = [];
+
+  if (buildingsFC?.features) {
+    for (const f of buildingsFC.features) {
+      const p = f.properties || {};
+      const hay = `${p.id || ""} ${p.name || ""}`.toLowerCase();
+      if (hay.includes(q)) {
+        results.push({ kind: "building", title: p.name || p.id, subtitle: p.id || "", buildingId: p.id, feature: f });
+      }
+    }
+  }
+
+  for (const [buildingId, roomsFC] of roomsFCByBuilding.entries()) {
+    for (const f of (roomsFC.features || [])) {
+      const p = f.properties || {};
+      const hay = `${p.label || ""} ${p.type || ""} ${p.notes || ""} ${p.buildingId || ""}`.toLowerCase();
+      if (hay.includes(q)) {
+        results.push({ kind: "room", title: p.label || "Room", subtitle: `${buildingId} - Floor ${p.floor}`, buildingId, floor: Number(p.floor), feature: f });
+      }
+    }
+  }
+
+  if (results.length === 0) { resultsEl.innerHTML = `<div class="muted">No matches found.</div>`; return; }
+
+  resultsEl.innerHTML = results.slice(0, 50).map((r, i) => `
+    <div class="result" data-idx="${i}">
+      <div><b>${escapeHtml(r.title)}</b></div>
+      <div class="muted">${escapeHtml(r.subtitle)}</div>
+    </div>
+  `).join("");
+
+  Array.from(resultsEl.querySelectorAll(".result")).forEach(el => {
+    el.addEventListener("click", async () => {
+      const idx = Number(el.getAttribute("data-idx"));
+      await jumpToResult(results[idx]);
+    });
+  });
+}
+
+async function jumpToResult(r) {
+  if (r.kind === "building") {
+    currentMode = "outdoor";
+    modeEl.value = "outdoor";
+    renderMode();
+    const coords = r.feature.geometry.coordinates;
+    map.setView([coords[1], coords[0]], 18);
+    return;
+  }
+
+  if (r.kind === "room") {
+    currentBuildingId = r.buildingId;
+    buildingEl.value = currentBuildingId;
+    await ensureRoomsLoaded(currentBuildingId);
+    populateFloorDropdown();
+    currentFloor = r.floor;
+    floorEl.value = String(currentFloor);
+    currentMode = "indoor";
+    modeEl.value = "indoor";
+    renderMode();
+    const [x, y] = r.feature.geometry.coordinates;
+    map.setView([y, x], 0);
+  }
+}
+
+function escapeHtml(s) {
+  return String(s ?? "")
+    .replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;").replaceAll("'", "&#039;");
+}
+function escapeAttr(s) { return escapeHtml(s).replaceAll('"', "&quot;"); }
+</script>
+</body>
+</html>

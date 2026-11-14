@@ -1,0 +1,40 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "SM",
+        "name": "Science and Mathematics (SM)",
+        "indoor": true,
+        "floors": [
+          1,
+          2,
+          3
+        ]
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -84.2901,
+          30.4543
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "LIB",
+        "name": "Library (Demo)",
+        "indoor": false
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -84.2896,
+          30.4546
+        ]
+      }
+    }
+  ]
+}
