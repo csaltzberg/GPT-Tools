@@ -1,0 +1,8 @@
+# Generated deployment and preview copies
+_site/
+_preview/
+# Local Python/test files
+__pycache__/
+*.py[cod]
+.venv/
+test-results/
